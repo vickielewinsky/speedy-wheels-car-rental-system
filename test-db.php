@@ -1,32 +1,31 @@
 <?php
-require_once "src/config/database.php";
-
-echo "<h3>Database Connection Test</h3>";
-
-try {
-    $database = new Database();
-    $conn = $database->getConnection();
-    
-    if ($conn) {
-        echo "<div class='alert alert-success'>✅ Database connection successful!</div>";
-        
-        // Test if tables exist
-        $tables = ['vehicles', 'customers', 'bookings', 'users'];
-        foreach ($tables as $table) {
-            $stmt = $conn->query("SHOW TABLES LIKE '$table'");
-            if ($stmt->rowCount() > 0) {
-                echo "<p>✅ Table '$table' exists</p>";
-            } else {
-                echo "<p>❌ Table '$table' missing - import database schema first</p>";
-            }
-        }
-        
-    } else {
-        echo "<div class='alert alert-danger'>❌ Database connection failed</div>";
-    }
-} catch (Exception $e) {
-    echo "<div class='alert alert-danger'>❌ Error: " . $e->getMessage() . "</div>";
-    echo "<p>Make sure to import the database schema first via phpMyAdmin</p>";
-}
+require_once __DIR__ . '/src/config/config.php';
+$page_title = "System - Database Test";
+include __DIR__ . '/src/includes/header.php';
 ?>
-<a href="index.php" class="btn btn-primary">Go to Homepage</a>
+
+<div class="card">
+  <div class="card-body">
+    <h4>Database Connection Test</h4>
+    <?php
+    try {
+        $stmt = $pdo->query("SELECT DATABASE()")->fetchColumn();
+        echo "<div class='alert alert-success'>✅ Connected to database: <strong>" . htmlspecialchars($stmt) . "</strong></div>";
+
+        $tables = ['vehicles','customers','bookings','users'];
+        echo "<ul class='list-group'>";
+        foreach ($tables as $t) {
+            $exists = $pdo->query("SHOW TABLES LIKE " . $pdo->quote($t))->rowCount() > 0;
+            $badge = $exists ? "<span class='badge bg-success'>exists</span>" : "<span class='badge bg-danger'>missing</span>";
+            echo "<li class='list-group-item d-flex justify-content-between align-items-center'>" . htmlspecialchars($t) . " " . $badge . "</li>";
+        }
+        echo "</ul>";
+    } catch (Exception $e) {
+        echo "<div class='alert alert-danger'>❌ Error: " . htmlspecialchars($e->getMessage()) . "</div>";
+    }
+    ?>
+    <a href="<?php echo url('index.php'); ?>" class="btn btn-primary mt-3"><i class="fas fa-home"></i> Back to Home</a>
+  </div>
+</div>
+
+<?php include __DIR__ . '/src/includes/footer.php'; ?>
