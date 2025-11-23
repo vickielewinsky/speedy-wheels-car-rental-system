@@ -1,0 +1,15 @@
+# .htaccess for Speedy Wheels
+DirectoryIndex index.php index.html
+
+# Enable URL rewriting
+RewriteEngine On
+
+# If the requested file exists, serve it
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Redirect folder requests to index.php
+RewriteRule ^src/modules/vehicles/?$ src/modules/vehicles/index.php [L]
+RewriteRule ^src/modules/bookings/?$ src/modules/bookings/index.php [L]
+RewriteRule ^src/modules/customers/?$ src/modules/customers/index.php [L]

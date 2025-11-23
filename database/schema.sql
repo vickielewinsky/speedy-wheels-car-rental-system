@@ -76,3 +76,22 @@ INSERT INTO vehicles (plate_no, model, make, year, color, daily_rate, status) VA
 ('KCA 123A', 'Toyota RAV4', 'Toyota', 2022, 'White', 6000.00, 'available'),
 ('KBM 456B', 'Honda CR-V', 'Honda', 2021, 'Black', 5500.00, 'available'),
 ('KDA 789C', 'Nissan X-Trail', 'Nissan', 2023, 'Silver', 6500.00, 'available');
+
+-- Payments table for MPESA transactions
+CREATE TABLE payments (
+    payment_id INT PRIMARY KEY AUTO_INCREMENT,
+    booking_id INT,
+    phone VARCHAR(15) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    merchant_request_id VARCHAR(50),
+    checkout_request_id VARCHAR(50),
+    mpesa_receipt_number VARCHAR(50),
+    transaction_date TIMESTAMP NULL,
+    status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE,
+    INDEX idx_status (status),
+    INDEX idx_merchant (merchant_request_id),
+    INDEX idx_checkout (checkout_request_id)
+);
