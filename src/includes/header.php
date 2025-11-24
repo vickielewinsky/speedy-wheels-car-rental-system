@@ -9,6 +9,9 @@ if (!isset($page_title)) {
     $page_title = APP_NAME;
 }
 
+// Include auth functions
+require_once __DIR__ . '/auth.php';
+
 // Enhanced base_url function with environment awareness
 function base_url($path = '') {
     // Detect environment for flexible path handling
@@ -28,17 +31,17 @@ $nav_items = [
         'icon' => 'fas fa-home'
     ],
     'vehicles' => [
-        'url' => base_url('src/modules/vehicles/index.php'),  // FIXED: Added index.php
+        'url' => base_url('src/modules/vehicles/index.php'),
         'title' => 'Vehicles',
         'icon' => 'fas fa-car'
     ],
     'bookings' => [
-        'url' => base_url('src/modules/bookings/index.php'),  // FIXED: Added index.php
+        'url' => base_url('src/modules/bookings/index.php'),
         'title' => 'Bookings',
         'icon' => 'fas fa-calendar-check'
     ],
     'customers' => [
-        'url' => base_url('src/modules/customers/index.php'), // FIXED: Added index.php
+        'url' => base_url('src/modules/customers/index.php'),
         'title' => 'Customers',
         'icon' => 'fas fa-users'
     ],
@@ -46,11 +49,6 @@ $nav_items = [
         'url' => base_url('src/modules/payments/payment.php'),
         'title' => 'MPESA Payment',
         'icon' => 'fas fa-money-bill-wave'
-    ],
-    'system_test' => [
-        'url' => base_url('test-db.php'),
-        'title' => 'System Test',
-        'icon' => 'fas fa-vial'
     ]
 ];
 
@@ -160,6 +158,37 @@ function is_active_nav($url, $current_script) {
       box-shadow: none;
     }
     
+    .user-dropdown {
+      margin-left: 10px;
+    }
+    
+    .user-dropdown .nav-link {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .user-dropdown .nav-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .dropdown-menu {
+      border: none;
+      box-shadow: var(--shadow);
+      border-radius: 10px;
+    }
+    
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+    }
+    
+    .dropdown-item:hover {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
     /* Mobile responsiveness */
     @media (max-width: 991.98px) {
       .navbar-nav {
@@ -174,6 +203,11 @@ function is_active_nav($url, $current_script) {
       
       .nav-link i {
         width: 20px;
+      }
+      
+      .user-dropdown {
+        margin-left: 0;
+        margin-top: 10px;
       }
     }
     
@@ -217,6 +251,47 @@ function is_active_nav($url, $current_script) {
             </a>
           </li>
         <?php endforeach; ?>
+        
+        <!-- Authentication Links -->
+        <?php if (isAuthenticated()): ?>
+          <!-- User is logged in - show user dropdown -->
+          <li class="nav-item dropdown user-dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-user-circle"></i>
+              <span><?php echo getCurrentUsername(); ?></span>
+              <?php if (hasRole('admin')): ?>
+                <span class="badge bg-warning ms-1">Admin</span>
+              <?php endif; ?>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <a class="dropdown-item" href="<?php echo base_url('src/modules/auth/dashboard.php'); ?>">
+                  <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="<?php echo base_url('src/modules/auth/logout.php'); ?>">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+              </li>
+            </ul>
+          </li>
+        <?php else: ?>
+          <!-- User is not logged in - show login/register -->
+          <li class="nav-item">
+            <a class="nav-link" href="<?php echo base_url('src/modules/auth/login.php'); ?>">
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Login</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?php echo base_url('src/modules/auth/register.php'); ?>">
+              <i class="fas fa-user-plus"></i>
+              <span>Register</span>
+            </a>
+          </li>
+        <?php endif; ?>
       </ul>
     </div>
   </div>
