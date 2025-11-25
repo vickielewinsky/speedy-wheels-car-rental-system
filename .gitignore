@@ -1,40 +1,114 @@
+# =============================================
 # Speedy Wheels Car Rental System - PHP Project
 # TUM Diploma Project - DCS/365J/2023
+# =============================================
 
-# PHP Specific
+# =============================================
+# SENSITIVE CONFIGURATION FILES
+# =============================================
+src/config/database.php
+src/config/email_config.php
+src/config/mpesa.php
+src/config/config.php
+/config.php
+*.env
+.env.local
+.env.production
+
+# =============================================
+# DEPENDENCIES AND VENDOR FILES
+# =============================================
 /vendor/
 /composer.lock
+/composer.phar
+
+# =============================================
+# LOGS AND TEMPORARY FILES
+# =============================================
 *.log
 /logs/
 /cache/
 /sessions/
-
-# Configuration files with sensitive data
-/src/config/database.php
-/config.php
-*.env
-
-# Uploaded files
-/uploads/
-/assets/uploads/
 /temp/
-
-# Operating System
-.DS_Store
-Thumbs.db
-Desktop.ini
-
-# IDE Files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Temporary files
 *.tmp
 *.cache
 *.backup
 *.bak
+error_log
+apache_access.log
+apache_error.log
 
-# Database backups
+# =============================================
+# SERVER AND ACCESS FILES
+# =============================================
+.htaccess
+.htpasswd
+
+# =============================================
+# USER UPLOADS AND GENERATED CONTENT
+# =============================================
+/uploads/
+/assets/uploads/
+/images/uploads/
+/exports/
+/reports/
+
+# =============================================
+# OPERATING SYSTEM FILES
+# =============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# =============================================
+# IDE AND EDITOR FILES
+# =============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-*
+*.komodoproject
+
+# =============================================
+# DATABASE BACKUPS
+# =============================================
 database/dump.sql
+*.sql
+*.dump
+database_backup/
+
+# =============================================
+# TEST AND DEVELOPMENT FILES
+# =============================================
+test-db.php
+test-mpesa-setup.php
+test_email_setup.php
+test_email_web.php
+test_mpesa_connection.php
+test_passwords.php
+test_real_mpesa.php
+test_paths.php
+
+# =============================================
+# BUILD AND DEPLOYMENT
+# =============================================
+/build/
+/dist/
+/deploy/
+*.tar.gz
+*.zip
+
+# =============================================
+# NODE.JS (if added later)
+# =============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
