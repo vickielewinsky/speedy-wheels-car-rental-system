@@ -1,5 +1,7 @@
 <?php
 // src/modules/auth/register.php
+// Start output buffering to prevent header issues
+ob_start();
 
 // Start session at the VERY BEGINNING
 if (session_status() === PHP_SESSION_NONE) {
@@ -22,7 +24,7 @@ if (isAuthenticated()) {
 $error = '';
 $success = '';
 
-if ($_POST) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_data = [
         'username' => $_POST['username'] ?? '',
         'email' => $_POST['email'] ?? '',
@@ -37,7 +39,7 @@ if ($_POST) {
     
     if ($result['success']) {
         $_SESSION['success_message'] = $result['message'];
-        header("Location: " . base_url('index.php'));
+        header("Location: " . base_url('src/modules/auth/login.php'));
         exit();
     } else {
         $error = $result['error'];
@@ -115,4 +117,7 @@ if ($_POST) {
     </div>
 </div>
 
-<?php require_once "../../includes/footer.php"; ?>
+<?php 
+require_once "../../includes/footer.php"; 
+ob_end_flush();
+?>

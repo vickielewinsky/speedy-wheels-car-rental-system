@@ -10,6 +10,12 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Calculate the correct base path for includes
+$base_dir = dirname(__DIR__); // Goes up from src/includes to src/
+
+// Include database config with correct path
+require_once $base_dir . '/config/database.php';
+
 /**
  * Check if user is authenticated
  */
@@ -185,4 +191,97 @@ function redirectToLogin($returnUrl = null) {
  */
 function getReturnUrl($default = 'index.php') {
     return $_GET['return'] ?? $default;
+}
+
+/**
+ * Get database connection
+ */
+function getAuthDatabaseConnection() {
+    try {
+        $pdo = getDatabaseConnection();
+        return $pdo;
+    } catch (Exception $e) {
+        error_log("Auth Database Connection Failed: " . $e->getMessage());
+        throw new Exception("Unable to connect to database. Please try again later.");
+    }
+}
+
+/**
+ * Verify user credentials
+ */
+function verifyUserCredentials($username, $password) {
+    try {
+        $pdo = getAuthDatabaseConnection();
+        
+        $stmt = $pdo->prepare("SELECT id, username, email, password_hash, user_role, first_name, last_name FROM users WHERE username = ? OR email = ?");
+        $stmt->execute([$username, $username]);
+        $user = $stmt->fetch();
+        
+        if ($user && password_verify($password, $user['password_hash'])) {
+            return [
+                'success' => true,
+                'user' => [
+                    'id' => $user['id'],
+                    'username' => $user['username'],
+                    'email' => $user['email'],
+                    'role' => $user['user_role'],
+                    'first_name' => $user['first_name'],
+                    'last_name' => $user['last_name']
+                ]
+            ];
+        }
+        
+        return ['success' => false, 'message' => 'Invalid username or password'];
+        
+    } catch (Exception $e) {
+        error_log("User verification error: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Database error occurred'];
+    }
+}
+
+/**
+ * Check if user exists by username or email
+ */
+function userExists($username, $email) {
+    try {
+        $pdo = getAuthDatabaseConnection();
+        
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+        $stmt->execute([$username, $email]);
+        
+        return $stmt->fetch() !== false;
+        
+    } catch (Exception $e) {
+        error_log("User existence check error: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Create new user
+ */
+function createUser($userData) {
+    try {
+        $pdo = getAuthDatabaseConnection();
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO users (username, email, password_hash, first_name, last_name, phone, user_role, is_active, created_at) 
+            VALUES (?, ?, ?, ?, ?, ?, 'customer', 1, NOW())
+        ");
+        
+        $success = $stmt->execute([
+            $userData['username'],
+            $userData['email'],
+            password_hash($userData['password'], PASSWORD_DEFAULT),
+            $userData['first_name'],
+            $userData['last_name'],
+            $userData['phone'] ?? null
+        ]);
+        
+        return $success ? $pdo->lastInsertId() : false;
+        
+    } catch (Exception $e) {
+        error_log("User creation error: " . $e->getMessage());
+        return false;
+    }
 }

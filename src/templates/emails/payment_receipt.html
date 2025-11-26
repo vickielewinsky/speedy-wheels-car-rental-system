@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; background: #f9f9f9; }
+        .header { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; padding: 30px; text-align: center; }
+        .content { padding: 30px; background: white; margin: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .receipt-details { background: #f8f9fa; padding: 20px; border-radius: 5px; border-left: 4px solid #28a745; margin: 20px 0; }
+        .footer { background: #343a40; color: white; padding: 20px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Payment Receipt</h1>
+            <p>Speedy Wheels Car Rental</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear <strong>{{customer_name}}</strong>,</p>
+            <p>Thank you for your payment. Your booking is now confirmed and secured.</p>
+            
+            <div class="receipt-details">
+                <h3 style="margin-top: 0;">🧾 Receipt Details</h3>
+                <p><strong>Transaction ID:</strong> {{transaction_id}}</p>
+                <p><strong>Booking ID:</strong> #{{booking_id}}</p>
+                <p><strong>Vehicle:</strong> {{vehicle}}</p>
+                <p><strong>Amount Paid:</strong> KSh {{amount}}</p>
+                <p><strong>Payment Date:</strong> {{payment_date}}</p>
+                <p><strong>Status:</strong> <span style="color: #28a745;">✅ Paid</span></p>
+            </div>
+            
+            <p>This receipt confirms your payment has been processed successfully.</p>
+            <p>Please present this receipt (or your booking confirmation) when picking up your vehicle.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Speedy Wheels Car Rental &copy; 2024</p>
+        </div>
+    </div>
+</body>
+</html>
