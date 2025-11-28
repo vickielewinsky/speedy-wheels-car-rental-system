@@ -1,0 +1,120 @@
+/* Card Component Styles */
+.vehicle-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.vehicle-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.vehicle-card-img {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.vehicle-card-body {
+    padding: 20px;
+}
+
+.vehicle-features {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+}
+
+.vehicle-features li {
+    padding: 5px 0;
+    color: #666;
+}
+
+.vehicle-price {
+    font-size: 24px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.vehicle-card-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #28a745;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dashboard-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.dashboard-card .card-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #667eea;
+    margin: 10px 0;
+}
+
+.dashboard-card .card-label {
+    color: #6c757d;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Dashboard specific card styles */
+.dashboard-welcome-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white;
+    border: none;
+    border-radius: 12px;
+}
+
+.dashboard-welcome-card .opacity-50 {
+    opacity: 0.7;
+}
+
+.quick-actions-card .btn {
+    text-align: left;
+    padding: 12px 15px;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.quick-actions-card .btn:hover {
+    background: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.profile-table th {
+    background: none;
+    color: #495057;
+    font-weight: 600;
+    width: 30%;
+}
+
+.profile-table td {
+    border: none;
+    padding: 8px 12px;
+}
+
+.profile-table tr:nth-child(even) {
+    background: #f8f9fa;
+}

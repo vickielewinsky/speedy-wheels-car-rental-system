@@ -52,157 +52,27 @@ function is_active_nav($url, $current_script) {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title><?php echo htmlspecialchars($page_title); ?></title>
+  
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <!-- Main CSS -->
+  <link href="<?php echo base_url('src/assets/css/main.css'); ?>" rel="stylesheet">
 
   <style>
-    :root {
-      --primary-color: #667eea;
-      --secondary-color: #764ba2;
-    }
-    
     body { 
       background: #f8f9fa; 
       padding-top: 120px;
       min-height: 100vh;
     }
     
-    /* Simple Two-Row Navbar */
-    .navbar-main {
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 1030;
-    }
-    
-    /* Top Row - Brand */
-    .navbar-top {
-      background: rgba(0,0,0,0.1);
-      padding: 10px 0;
-      text-align: center;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-    }
-    
-    .brand-title {
-      color: white;
-      font-size: 28px;
-      font-weight: bold;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .brand-title:hover {
-      color: white;
-      transform: scale(1.05);
-      transition: transform 0.3s ease;
-    }
-    
-    .brand-tagline {
-      color: rgba(255,255,255,0.8);
-      font-size: 14px;
-      margin-top: 2px;
-    }
-    
-    /* Bottom Row - Navigation */
-    .navbar-bottom {
-      padding: 8px 0;
-    }
-    
-    .nav-links-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-    
-    .nav-item-custom {
-      margin: 0 2px;
-    }
-    
-    .nav-link-custom {
-      color: white !important;
-      padding: 8px 16px !important;
-      border-radius: 6px;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      text-decoration: none;
-    }
-    
-    .nav-link-custom:hover {
-      background: rgba(255,255,255,0.15);
-      transform: translateY(-1px);
-    }
-    
-    .nav-link-custom.active {
-      background: rgba(255,255,255,0.2);
-      font-weight: 600;
-    }
-    
-    /* User Section */
-    .user-section {
-      position: absolute;
-      right: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-    
-    .notification-badge {
-      background: #ff4757;
-      color: white;
-      border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      font-size: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      top: -5px;
-      right: -5px;
-    }
-    
-    .admin-badge {
-      background: #ffd700;
-      color: black;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 10px;
-      margin-left: 5px;
-    }
-    
-    /* Mobile Styles */
+    /* Mobile body padding adjustment */
     @media (max-width: 768px) {
       body {
         padding-top: 100px;
-      }
-      
-      .nav-links-container {
-        flex-direction: column;
-        gap: 5px;
-      }
-      
-      .nav-link-custom {
-        justify-content: center;
-        width: 100%;
-      }
-      
-      .user-section {
-        position: static;
-        transform: none;
-        margin-top: 10px;
-        text-align: center;
-      }
-      
-      .brand-title {
-        font-size: 24px;
       }
     }
   </style>

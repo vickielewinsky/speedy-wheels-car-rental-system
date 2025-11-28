@@ -46,7 +46,7 @@ $vehicles = $pdo->query("SELECT * FROM vehicles ORDER BY vehicle_id DESC")->fetc
 <div class="row">
   <div class="col-md-4">
     <div class="card mb-3">
-      <div class="card-header"><strong>Add New Vehicle</strong></div>
+      <div class="card-header bg-primary text-white"><strong>Add New Vehicle</strong></div>
       <div class="card-body">
         <form method="POST" novalidate>
           <div class="mb-3">
@@ -73,13 +73,13 @@ $vehicles = $pdo->query("SELECT * FROM vehicles ORDER BY vehicle_id DESC")->fetc
 
   <div class="col-md-8">
     <div class="card">
-      <div class="card-header"><strong>Fleet</strong></div>
+      <div class="card-header bg-primary text-white"><strong>Fleet</strong></div>
       <div class="card-body">
         <?php if (empty($vehicles)): ?>
             <p class="text-muted">No vehicles found. Use the form to add one.</p>
         <?php else: ?>
             <div class="table-responsive">
-              <table class="table table-striped">
+              <table class="table vehicle-management-table">
                 <thead>
                   <tr>
                     <th>Plate</th>
@@ -99,12 +99,9 @@ $vehicles = $pdo->query("SELECT * FROM vehicles ORDER BY vehicle_id DESC")->fetc
                       <td>
                         <?php
                           $s = $v['status'] ?? 'available';
-                          $cls = 'secondary';
-                          if ($s === 'available') $cls='success';
-                          if ($s === 'booked') $cls='warning';
-                          if ($s === 'maintenance') $cls='danger';
+                          $badgeClass = 'status-badge-' . $s;
                         ?>
-                        <span class="badge bg-<?php echo $cls; ?>"><?php echo htmlspecialchars(ucfirst($s)); ?></span>
+                        <span class="<?php echo $badgeClass; ?>"><?php echo htmlspecialchars(ucfirst($s)); ?></span>
                       </td>
                     </tr>
                   <?php endforeach; ?>

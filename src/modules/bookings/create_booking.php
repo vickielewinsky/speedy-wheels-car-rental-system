@@ -73,17 +73,17 @@ try {
                     <i class="fas fa-calendar-plus me-2"></i>Booking Information
                 </h5>
             </div>
-            <div class="card-body">
+            <div class="card-body booking-form-container">
                 <form action="process_booking.php" method="POST" id="bookingForm">
                     <div class="row">
                         <!-- Customer Information -->
                         <div class="col-md-6">
-                            <h6 class="mb-3 text-primary">
+                            <h6 class="form-section-header">
                                 <i class="fas fa-user me-2"></i>Customer Information
                             </h6>
                             
                             <!-- Customer Selection Tabs -->
-                            <ul class="nav nav-pills mb-3" id="customerTab" role="tablist">
+                            <ul class="nav nav-pills mb-3 customer-tabs" id="customerTab" role="tablist">
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link active" id="existing-customer-tab" data-bs-toggle="pill" 
                                             data-bs-target="#existing-customer" type="button" role="tab">
@@ -119,7 +119,7 @@ try {
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
-                                    <div id="existingCustomerDetails" class="bg-light p-3 rounded small" style="display: none;">
+                                    <div id="existingCustomerDetails" class="customer-details-panel p-3 rounded small" style="display: none;">
                                         <h6>Customer Details:</h6>
                                         <div id="customerDetailsContent"></div>
                                     </div>
@@ -166,7 +166,7 @@ try {
 
                         <!-- Vehicle Selection -->
                         <div class="col-md-6">
-                            <h6 class="mb-3 text-primary">
+                            <h6 class="form-section-header">
                                 <i class="fas fa-car me-2"></i>Vehicle Selection
                             </h6>
                             
@@ -187,7 +187,7 @@ try {
                             
                             <div class="mb-3">
                                 <label class="form-label">Vehicle Details</label>
-                                <div id="vehicleDetails" class="text-muted small">
+                                <div id="vehicleDetails" class="vehicle-details-panel text-muted small">
                                     Select a vehicle to see details
                                 </div>
                             </div>
@@ -199,11 +199,11 @@ try {
                     <!-- Rental Period -->
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="mb-3 text-primary">
+                            <h6 class="form-section-header">
                                 <i class="fas fa-calendar-alt me-2"></i>Rental Period
                             </h6>
                             
-                            <div class="row">
+                            <div class="row date-picker-group">
                                 <div class="col-md-6 mb-3">
                                     <label for="start_date" class="form-label">Start Date *</label>
                                     <input type="date" class="form-control" id="start_date" name="start_date" 
@@ -218,7 +218,7 @@ try {
                             
                             <div class="mb-3">
                                 <label class="form-label">Rental Duration</label>
-                                <div id="rentalDuration" class="text-muted">
+                                <div id="rentalDuration" class="rental-duration-display text-muted">
                                     Select dates to calculate duration
                                 </div>
                             </div>
@@ -247,11 +247,11 @@ try {
 
                         <!-- Pricing & Insurance -->
                         <div class="col-md-6">
-                            <h6 class="mb-3 text-primary">
+                            <h6 class="form-section-header">
                                 <i class="fas fa-money-bill-wave me-2"></i>Pricing Summary
                             </h6>
                             
-                            <div class="bg-light p-3 rounded mb-3">
+                            <div class="pricing-summary p-3 rounded mb-3">
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Daily Rate:</span>
                                     <span id="dailyRate">KSh 0.00</span>
@@ -263,7 +263,7 @@ try {
                                 <hr>
                                 <div class="d-flex justify-content-between fw-bold fs-5">
                                     <span>Total Amount:</span>
-                                    <span id="totalAmount" class="text-primary">KSh 0.00</span>
+                                    <span id="totalAmount" class="total-amount">KSh 0.00</span>
                                 </div>
                             </div>
 
@@ -291,7 +291,7 @@ try {
                     <!-- Additional Information -->
                     <div class="row mt-3">
                         <div class="col-12">
-                            <h6 class="mb-3 text-primary">
+                            <h6 class="form-section-header">
                                 <i class="fas fa-info-circle me-2"></i>Additional Information
                             </h6>
                             

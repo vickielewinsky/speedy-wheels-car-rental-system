@@ -31,7 +31,7 @@ $current_user = $auth->getCurrentUser();
     <!-- Welcome Card -->
     <div class="row mb-4">
         <div class="col-md-12">
-            <div class="card bg-primary text-white">
+            <div class="card dashboard-welcome-card">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-8">
@@ -50,14 +50,14 @@ $current_user = $auth->getCurrentUser();
     <!-- User Info -->
     <div class="row">
         <div class="col-md-6">
-            <div class="card">
+            <div class="card dashboard-card">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0"><i class="fas fa-user"></i> Profile Information</h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-borderless">
+                    <table class="table profile-table">
                         <tr>
-                            <th width="30%">Username:</th>
+                            <th>Username:</th>
                             <td><?php echo htmlspecialchars($current_user['username']); ?></td>
                         </tr>
                         <tr>
@@ -90,7 +90,7 @@ $current_user = $auth->getCurrentUser();
         </div>
 
         <div class="col-md-6">
-            <div class="card">
+            <div class="card dashboard-card quick-actions-card">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0"><i class="fas fa-rocket"></i> Quick Actions</h5>
                 </div>
@@ -119,7 +119,7 @@ $current_user = $auth->getCurrentUser();
     <!-- Recent Activity (Placeholder) -->
     <div class="row mt-4">
         <div class="col-md-12">
-            <div class="card">
+            <div class="card dashboard-card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="fas fa-history"></i> Recent Activity</h5>
                 </div>

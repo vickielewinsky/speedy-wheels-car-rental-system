@@ -1,0 +1,30 @@
+/* Footer Component Styles */
+.footer-custom {
+    background: #343a40 !important;
+    color: white;
+    padding: 2rem 0 1rem;
+    margin-top: 3rem;
+}
+
+.contact-info p {
+    margin-bottom: 0.5rem;
+}
+
+.social-links .btn {
+    transition: all 0.3s ease;
+    margin: 0 0.25rem 0.5rem;
+}
+
+.social-links .btn:hover {
+    transform: translateY(-2px);
+}
+
+.quick-links a {
+    color: #6c757d !important;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.quick-links a:hover {
+    color: #ffffff !important;
+}
