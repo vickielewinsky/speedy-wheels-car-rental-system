@@ -24,7 +24,7 @@ function base_url($path = '') {
     return $base_path . $clean_path;
 }
 
-// Navigation items
+// Navigation items (for other pages that might need it)
 $nav_items = [
     'home' => ['url' => base_url('index.php'), 'title' => 'Home', 'icon' => 'fas fa-home'],
     'vehicles' => ['url' => base_url('src/modules/vehicles/index.php'), 'title' => 'Vehicles', 'icon' => 'fas fa-car'],
@@ -65,79 +65,20 @@ function is_active_nav($url, $current_script) {
   <style>
     body { 
       background: #f8f9fa; 
-      padding-top: 120px;
+      padding-top: 80px; /* Reduced for fixed navbar */
       min-height: 100vh;
     }
     
     /* Mobile body padding adjustment */
     @media (max-width: 768px) {
       body {
-        padding-top: 100px;
+        padding-top: 70px; /* Reduced for mobile */
       }
     }
   </style>
 </head>
 <body>
 
-<!-- Simple Two-Row Navbar -->
-<nav class="navbar-main">
-  <!-- Top Row: Brand -->
-  <div class="navbar-top">
-    <div class="container">
-      <a href="<?php echo base_url('index.php'); ?>" class="brand-title">
-        <i class="fas fa-bolt"></i>
-        Speedy Wheels
-      </a>
-      <div class="brand-tagline">Premium Car Rentals</div>
-    </div>
-  </div>
-  
-  <!-- Bottom Row: Navigation -->
-  <div class="navbar-bottom">
-    <div class="container position-relative">
-      <div class="nav-links-container">
-        <?php foreach ($nav_items as $key => $item): ?>
-          <div class="nav-item-custom">
-            <a href="<?php echo $item['url']; ?>" 
-               class="nav-link-custom <?php echo is_active_nav($item['url'], $current_script) ? 'active' : ''; ?>">
-              <i class="<?php echo $item['icon']; ?>"></i>
-              <span><?php echo $item['title']; ?></span>
-              <?php if ($key === 'notifications'): ?>
-                <span class="notification-badge">3</span>
-              <?php endif; ?>
-            </a>
-          </div>
-        <?php endforeach; ?>
-      </div>
-      
-      <!-- User Section -->
-      <div class="user-section">
-        <?php if (isAuthenticated()): ?>
-          <div class="dropdown">
-            <a class="nav-link-custom dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-user"></i>
-              <?php echo getCurrentUsername(); ?>
-              <?php if (hasRole('admin')): ?>
-                <span class="admin-badge">Admin</span>
-              <?php endif; ?>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="<?php echo base_url('src/modules/auth/dashboard.php'); ?>">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-              </a></li>
-              <li><a class="dropdown-item" href="<?php echo base_url('src/modules/auth/logout.php'); ?>">
-                <i class="fas fa-sign-out-alt"></i> Logout
-              </a></li>
-            </ul>
-          </div>
-        <?php else: ?>
-          <a href="<?php echo base_url('src/modules/auth/login.php'); ?>" class="nav-link-custom">
-            <i class="fas fa-sign-in-alt"></i> Login
-          </a>
-        <?php endif; ?>
-      </div>
-    </div>
-  </div>
-</nav>
+<!-- OLD NAVBAR REMOVED - Using new navbar from index.php -->
 
 <main class="container mt-4">

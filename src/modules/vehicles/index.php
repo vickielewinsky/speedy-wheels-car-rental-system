@@ -1,117 +1,163 @@
 <?php
-// vehicles/index.php
-require_once __DIR__ . '/../../config/config.php';
-$page_title = "Vehicle Management";
-include __DIR__ . '/../../includes/header.php';
+// src/modules/vehicles/index.php - ADD BACK TO DASHBOARD BUTTON
+require_once "../../config/database.php";
+require_once "../../includes/auth.php";
 
-// Handle POST: add vehicle
-$messages = [];
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $plate_no = trim($_POST['plate_no'] ?? '');
-    $model = trim($_POST['model'] ?? '');
-    $make = trim($_POST['make'] ?? '');
-    $daily_rate = trim($_POST['daily_rate'] ?? '');
-
-    // Basic validation
-    if ($plate_no === '' || $model === '' || $make === '' || $daily_rate === '') {
-        $messages[] = ['type'=>'danger','text'=>'Please fill all required fields.'];
-    } else {
-        try {
-            $stmt = $pdo->prepare("INSERT INTO vehicles (plate_no, model, make, year, color, daily_rate, status, created_at) VALUES (:plate, :model, :make, NULL, NULL, :rate, 'available', NOW())");
-            $stmt->execute([
-                ':plate' => $plate_no,
-                ':model' => $model,
-                ':make' => $make,
-                ':rate' => (float)$daily_rate
-            ]);
-            $messages[] = ['type'=>'success','text'=>'Vehicle added successfully.'];
-        } catch (PDOException $e) {
-            // unique constraint?
-            $messages[] = ['type'=>'danger','text'=>'Error adding vehicle: ' . $e->getMessage()];
-        }
-    }
+// Require authentication and admin role
+requireAuthentication();
+if (!hasRole('admin')) {
+    header('Location: ' . base_url('src/modules/auth/login.php'));
+    exit();
 }
 
-// Fetch vehicles
-$vehicles = $pdo->query("SELECT * FROM vehicles ORDER BY vehicle_id DESC")->fetchAll();
+$page_title = "Manage Vehicles - Speedy Wheels";
+require_once "../../includes/header.php";
+
+// Get database connection
+try {
+    $pdo = getDatabaseConnection();
+    
+    // Fetch vehicles
+    $vehicles_stmt = $pdo->query("SELECT * FROM vehicles ORDER BY created_at DESC");
+    $vehicles = $vehicles_stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+} catch (PDOException $e) {
+    $vehicles = [];
+    error_log("Database error in vehicles index: " . $e->getMessage());
+}
 ?>
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>Vehicle Management</h3>
+
+<div class="container-fluid mt-4">
+    <!-- Header with Back to Dashboard -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="fas fa-car me-2 text-primary"></i>Manage Vehicles
+            </h1>
+            <p class="text-muted mb-0">Add, edit, or remove vehicles from the fleet</p>
+        </div>
+        <div class="btn-group">
+            <a href="<?php echo base_url('src/modules/auth/dashboard.php'); ?>" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+            </a>
+            <a href="add_vehicle.php" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Add New Vehicle
+            </a>
+        </div>
+    </div>
+
+    <!-- Vehicles Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-list me-2"></i>All Vehicles
+            </h5>
+        </div>
+        <div class="card-body">
+            <?php if (!empty($vehicles)): ?>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Vehicle Details</th>
+                                <th>Plate No</th>
+                                <th>Daily Rate</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($vehicles as $vehicle): ?>
+                                <tr>
+                                    <td>#<?php echo $vehicle['vehicle_id']; ?></td>
+                                    <td>
+                                        <div class="vehicle-image" style="width: 60px; height: 40px; background: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-car text-muted"></i>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong><?php echo htmlspecialchars($vehicle['make'] . ' ' . $vehicle['model']); ?></strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            <?php echo htmlspecialchars($vehicle['year'] . ' • ' . $vehicle['color']); ?>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <code><?php echo htmlspecialchars($vehicle['plate_no']); ?></code>
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">Ksh <?php echo number_format($vehicle['daily_rate'], 2); ?></strong>
+                                    </td>
+                                    <td>
+                                        <?php
+                                        $status_badge = $vehicle['status'] == 'available' ? 
+                                            'bg-success' : 'bg-danger';
+                                        ?>
+                                        <span class="badge <?php echo $status_badge; ?>">
+                                            <?php echo ucfirst($vehicle['status']); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="edit_vehicle.php?id=<?php echo $vehicle['vehicle_id']; ?>" 
+                                               class="btn btn-outline-primary" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-outline-danger" 
+                                                    onclick="deleteVehicle(<?php echo $vehicle['vehicle_id']; ?>)" 
+                                                    title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <div class="text-center py-5">
+                    <i class="fas fa-car fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Vehicles Found</h4>
+                    <p class="text-muted">Add your first vehicle to get started.</p>
+                    <a href="add_vehicle.php" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i> Add First Vehicle
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>
 
-<?php foreach ($messages as $m): ?>
-    <div class="alert alert-<?php echo $m['type']; ?>"><?php echo htmlspecialchars($m['text']); ?></div>
-<?php endforeach; ?>
+<script>
+function deleteVehicle(vehicleId) {
+    if (confirm('Are you sure you want to delete this vehicle? This action cannot be undone.')) {
+        // AJAX call to delete vehicle
+        fetch('delete_vehicle.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                vehicle_id: vehicleId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting vehicle: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting vehicle');
+        });
+    }
+}
+</script>
 
-<div class="row">
-  <div class="col-md-4">
-    <div class="card mb-3">
-      <div class="card-header bg-primary text-white"><strong>Add New Vehicle</strong></div>
-      <div class="card-body">
-        <form method="POST" novalidate>
-          <div class="mb-3">
-            <label class="form-label">Plate Number</label>
-            <input class="form-control" name="plate_no" required placeholder="KCA 123A">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Model</label>
-            <input class="form-control" name="model" required placeholder="Toyota RAV4">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Make</label>
-            <input class="form-control" name="make" required placeholder="Toyota">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Daily Rate (KES)</label>
-            <input type="number" step="0.01" class="form-control" name="daily_rate" required placeholder="6000.00">
-          </div>
-          <button class="btn btn-primary w-100">Add Vehicle</button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-8">
-    <div class="card">
-      <div class="card-header bg-primary text-white"><strong>Fleet</strong></div>
-      <div class="card-body">
-        <?php if (empty($vehicles)): ?>
-            <p class="text-muted">No vehicles found. Use the form to add one.</p>
-        <?php else: ?>
-            <div class="table-responsive">
-              <table class="table vehicle-management-table">
-                <thead>
-                  <tr>
-                    <th>Plate</th>
-                    <th>Model</th>
-                    <th>Make</th>
-                    <th>Daily Rate</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php foreach ($vehicles as $v): ?>
-                    <tr>
-                      <td><?php echo htmlspecialchars($v['plate_no']); ?></td>
-                      <td><?php echo htmlspecialchars($v['model']); ?></td>
-                      <td><?php echo htmlspecialchars($v['make']); ?></td>
-                      <td>KES <?php echo number_format($v['daily_rate'],2); ?></td>
-                      <td>
-                        <?php
-                          $s = $v['status'] ?? 'available';
-                          $badgeClass = 'status-badge-' . $s;
-                        ?>
-                        <span class="<?php echo $badgeClass; ?>"><?php echo htmlspecialchars(ucfirst($s)); ?></span>
-                      </td>
-                    </tr>
-                  <?php endforeach; ?>
-                </tbody>
-              </table>
-            </div>
-        <?php endif; ?>
-      </div>
-    </div>
-  </div>
-</div>
-
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php require_once "../../includes/footer.php"; ?>

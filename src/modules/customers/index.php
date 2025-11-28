@@ -1,86 +1,122 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
-$page_title = "Customer Management";
-include __DIR__ . '/../../includes/header.php';
+// src/modules/customers/index.php - ADD BACK TO DASHBOARD BUTTON
+require_once "../../config/database.php";
+require_once "../../includes/auth.php";
 
+// Require authentication and admin role
+requireAuthentication();
+if (!hasRole('admin')) {
+    header('Location: ' . base_url('src/modules/auth/login.php'));
+    exit();
+}
+
+$page_title = "Manage Customers - Speedy Wheels";
+require_once "../../includes/header.php";
+
+// Get database connection
 try {
-    $total_customers = (int)$pdo->query("SELECT COUNT(*) FROM customers")->fetchColumn();
-    $customers_with_bookings = (int)$pdo->query("SELECT COUNT(DISTINCT customer_id) FROM bookings")->fetchColumn();
-
-    $stmt = $pdo->query("SELECT c.*, COUNT(b.booking_id) AS total_bookings, MAX(b.created_at) AS last_booking_date FROM customers c LEFT JOIN bookings b ON c.customer_id=b.customer_id GROUP BY c.customer_id ORDER BY c.created_at DESC");
-    $customers = $stmt->fetchAll();
-} catch (Exception $e) {
-    $error = $e->getMessage();
+    $pdo = getDatabaseConnection();
+    
+    // Fetch customers
+    $customers_stmt = $pdo->query("SELECT * FROM customers ORDER BY created_at DESC");
+    $customers = $customers_stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+} catch (PDOException $e) {
+    $customers = [];
+    error_log("Database error in customers index: " . $e->getMessage());
 }
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h3><i class="fas fa-users text-info"></i> Customer Management</h3>
-  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCustomerModal"><i class="fas fa-plus"></i> Add</button>
-</div>
-
-<?php if (!empty($error)): ?><div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-
-<div class="row mb-4">
-  <div class="col-md-4">
-    <div class="card text-white bg-info mb-3"><div class="card-body"><h4 class="mb-0"><?php echo $total_customers; ?></h4><small>Total Customers</small></div></div>
-  </div>
-  <div class="col-md-4">
-    <div class="card text-white bg-success mb-3"><div class="card-body"><h4 class="mb-0"><?php echo $customers_with_bookings; ?></h4><small>Active Customers</small></div></div>
-  </div>
-  <div class="col-md-4">
-    <div class="card text-white bg-primary mb-3"><div class="card-body"><h4 class="mb-0"><?php echo (int)$pdo->query("SELECT COUNT(*) FROM bookings")->fetchColumn(); ?></h4><small>Total Bookings</small></div></div>
-  </div>
-</div>
-
-<div class="card">
-  <div class="card-header"><strong>Customer Directory</strong></div>
-  <div class="card-body">
-    <?php if (empty($customers)): ?>
-      <div class="text-center py-4"><p class="text-muted">No customers found.</p></div>
-    <?php else: ?>
-      <div class="table-responsive">
-        <table class="table table-striped">
-          <thead><tr><th>Name</th><th>Contact</th><th>ID</th><th>DL</th><th>Bookings</th><th>Last Booking</th></tr></thead>
-          <tbody>
-            <?php foreach ($customers as $c): ?>
-              <tr>
-                <td><strong><?php echo htmlspecialchars($c['name']); ?></strong></td>
-                <td><?php echo htmlspecialchars($c['email']); ?><br><small class="text-muted"><?php echo htmlspecialchars($c['phone']); ?></small></td>
-                <td><?php echo htmlspecialchars($c['id_number']); ?></td>
-                <td><?php echo htmlspecialchars($c['dl_number']); ?></td>
-                <td><span class="badge bg-primary"><?php echo (int)$c['total_bookings']; ?></span></td>
-                <td><?php echo $c['last_booking_date'] ? date('M j, Y',strtotime($c['last_booking_date'])) : '<span class="text-muted">No bookings</span>'; ?></td>
-              </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-      </div>
-    <?php endif; ?>
-  </div>
-</div>
-
-<!-- Add Customer Modal (frontend only - you can implement backend) -->
-<div class="modal fade" id="addCustomerModal" tabindex="-1">
-  <div class="modal-dialog">
-    <form class="modal-content" id="addCustomerForm" method="post" action="<?php echo url('src/modules/customers/create.php'); ?>">
-      <div class="modal-header"><h5 class="modal-title">Add Customer</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body">
-        <div class="mb-3"><label class="form-label">Full name</label><input name="name" class="form-control" required></div>
-        <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control"></div>
-        <div class="mb-3"><label class="form-label">Phone</label><input name="phone" class="form-control" required></div>
-        <div class="row">
-          <div class="col"><div class="mb-3"><label class="form-label">ID Number</label><input name="id_number" class="form-control" required></div></div>
-          <div class="col"><div class="mb-3"><label class="form-label">DL Number</label><input name="dl_number" class="form-control" required></div></div>
+<div class="container-fluid mt-4">
+    <!-- Header with Back to Dashboard -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="fas fa-users me-2 text-info"></i>Manage Customers
+            </h1>
+            <p class="text-muted mb-0">View and manage customer records</p>
         </div>
-        <div class="mb-3"><label class="form-label">Address</label><textarea name="address" class="form-control"></textarea></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-primary">Add</button>
-      </div>
-    </form>
-  </div>
+        <div class="btn-group">
+            <a href="<?php echo base_url('src/modules/auth/dashboard.php'); ?>" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+            </a>
+            <a href="add_customer.php" class="btn btn-info">
+                <i class="fas fa-user-plus me-1"></i> Add Customer
+            </a>
+        </div>
+    </div>
+
+    <!-- Customers Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-list me-2"></i>All Customers
+            </h5>
+        </div>
+        <div class="card-body">
+            <?php if (!empty($customers)): ?>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Customer ID</th>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>ID Number</th>
+                                <th>DL Number</th>
+                                <th>Registration Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($customers as $customer): ?>
+                                <tr>
+                                    <td>#<?php echo $customer['customer_id']; ?></td>
+                                    <td>
+                                        <strong><?php echo htmlspecialchars($customer['name']); ?></strong>
+                                    </td>
+                                    <td>
+                                        <div><?php echo htmlspecialchars($customer['phone']); ?></div>
+                                        <small class="text-muted"><?php echo htmlspecialchars($customer['email'] ?? 'No email'); ?></small>
+                                    </td>
+                                    <td>
+                                        <code><?php echo htmlspecialchars($customer['id_number']); ?></code>
+                                    </td>
+                                    <td>
+                                        <code><?php echo htmlspecialchars($customer['dl_number']); ?></code>
+                                    </td>
+                                    <td>
+                                        <?php echo date('M j, Y', strtotime($customer['created_at'])); ?>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="view_customer.php?id=<?php echo $customer['customer_id']; ?>" 
+                                               class="btn btn-outline-primary" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="edit_customer.php?id=<?php echo $customer['customer_id']; ?>" 
+                                               class="btn btn-outline-warning" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Customers Found</h4>
+                    <p class="text-muted">Add your first customer to get started.</p>
+                    <a href="add_customer.php" class="btn btn-info">
+                        <i class="fas fa-user-plus me-1"></i> Add First Customer
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php require_once "../../includes/footer.php"; ?>

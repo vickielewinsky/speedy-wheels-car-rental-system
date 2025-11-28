@@ -1,114 +1,111 @@
 <?php
-// src/modules/notifications/index.php
-require_once '../../config/database.php';  // Fixed path - was ../../../config/
-require_once '../../includes/auth.php';
-require_once '../../includes/header.php';
+// src/modules/notifications/index.php - ADD BACK TO DASHBOARD BUTTON
+require_once "../../config/database.php";
+require_once "../../includes/auth.php";
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../auth/login.php');
+// Require authentication and admin role
+requireAuthentication();
+if (!hasRole('admin')) {
+    header('Location: ' . base_url('src/modules/auth/login.php'));
     exit();
 }
 
-$page_title = "Notifications - " . APP_NAME;
+$page_title = "Notifications - Speedy Wheels";
+require_once "../../includes/header.php";
 ?>
 
 <div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-12">
-            <h1><i class="fas fa-envelope"></i> Notifications & Email</h1>
-            <p class="lead">Manage your email preferences and notifications</p>
+    <!-- Header with Back to Dashboard -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="fas fa-envelope me-2 text-secondary"></i>Notifications
+            </h1>
+            <p class="text-muted mb-0">Manage system notifications and alerts</p>
+        </div>
+        <div class="btn-group">
+            <a href="<?php echo base_url('src/modules/auth/dashboard.php'); ?>" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+            </a>
+            <button class="btn btn-secondary">
+                <i class="fas fa-cog me-1"></i> Settings
+            </button>
         </div>
     </div>
 
+    <!-- Notifications Content -->
     <div class="row">
-        <div class="col-md-6">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-bell"></i> Notification Settings</h5>
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Recent Notifications</h5>
                 </div>
                 <div class="card-body">
-                    <form>
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="bookingNotifications" checked>
-                                <label class="form-check-label" for="bookingNotifications">
-                                    Booking Confirmations
-                                </label>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">New Booking Received</h6>
+                                <p class="mb-1 text-muted">Customer John Doe booked Toyota RAV4 for 3 days</p>
+                                <small class="text-muted">2 hours ago</small>
                             </div>
+                            <span class="badge bg-success">New</span>
                         </div>
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="paymentNotifications" checked>
-                                <label class="form-check-label" for="paymentNotifications">
-                                    Payment Receipts
-                                </label>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Payment Received</h6>
+                                <p class="mb-1 text-muted">Payment of Ksh 15,000 received for booking #102</p>
+                                <small class="text-muted">5 hours ago</small>
                             </div>
+                            <span class="badge bg-info">Payment</span>
                         </div>
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="reminderNotifications">
-                                <label class="form-check-label" for="reminderNotifications">
-                                    Rental Reminders
-                                </label>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Vehicle Maintenance Due</h6>
+                                <p class="mb-1 text-muted">Toyota Axio (KCD 123A) is due for service</p>
+                                <small class="text-muted">1 day ago</small>
                             </div>
+                            <span class="badge bg-warning">Maintenance</span>
                         </div>
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="promotionalNotifications">
-                                <label class="form-check-label" for="promotionalNotifications">
-                                    Promotional Offers
-                                </label>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Settings</button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-6">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-paper-plane"></i> Email Test</h5>
+        
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Notification Settings</h5>
                 </div>
                 <div class="card-body">
-                    <p>Test the email system by sending a test notification:</p>
-                    <form method="POST" action="send_test_email.php">
-                        <div class="mb-3">
-                            <label for="testEmail" class="form-label">Test Email Address</label>
-                            <input type="email" class="form-control" id="testEmail" name="test_email" 
-                                   value="<?php echo $_SESSION['email'] ?? ''; ?>" required>
-                        </div>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-paper-plane"></i> Send Test Email
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="card shadow">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-cog"></i> Email System Status</h5>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-success">
-                        <i class="fas fa-check-circle"></i> <strong>Email System: Active</strong>
-                        <p class="mb-0 mt-2">The email notification system is ready to send:</p>
-                        <ul class="mb-0">
-                            <li>Booking confirmations</li>
-                            <li>Payment receipts</li>
-                            <li>Rental reminders</li>
-                            <li>System notifications</li>
-                        </ul>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                        <label class="form-check-label" for="emailNotifications">
+                            Email Notifications
+                        </label>
                     </div>
-                    <a href="<?php echo base_url('test_email_web.php'); ?>" class="btn btn-outline-info btn-sm">
-                        <i class="fas fa-vial"></i> Run Email Diagnostics
-                    </a>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="smsNotifications" checked>
+                        <label class="form-check-label" for="smsNotifications">
+                            SMS Notifications
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="bookingAlerts" checked>
+                        <label class="form-check-label" for="bookingAlerts">
+                            New Booking Alerts
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="paymentAlerts" checked>
+                        <label class="form-check-label" for="paymentAlerts">
+                            Payment Alerts
+                        </label>
+                    </div>
+                    <button class="btn btn-primary w-100">Save Settings</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<?php require_once '../../includes/footer.php'; ?>
+<?php require_once "../../includes/footer.php"; ?>
