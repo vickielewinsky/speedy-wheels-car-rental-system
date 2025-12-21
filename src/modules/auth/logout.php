@@ -1,16 +1,8 @@
 <?php
 // src/modules/auth/logout.php
-
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Destroy all session data to log out user
-$_SESSION = [];
+require_once __DIR__ . "/../../helpers/url_helper.php";
+session_start();
 session_destroy();
-
-// Redirect to main index.php in the root directory
-header("Location: /speedy-wheels-car-rental-system/index.php");
+header("Location: " . base_url("index.php"));
 exit();
 ?>
