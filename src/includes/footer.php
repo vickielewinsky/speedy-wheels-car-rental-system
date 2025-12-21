@@ -1,8 +1,7 @@
 <?php
 // src/includes/footer.php
 ?>
-
-<footer class="footer-custom">
+<footer class="footer-custom mt-auto">
   <div class="container">
     <!-- Contact Info - Centered Above Buttons -->
     <div class="row mb-3">

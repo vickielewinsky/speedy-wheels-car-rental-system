@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($result['success']) {
         $_SESSION['success_message'] = $result['message'];
-        header("Location: " . base_url('src/modules/auth/login.php'));
+        header("Location: " . login.php);
         exit();
     } else {
         $error = $result['error'];
