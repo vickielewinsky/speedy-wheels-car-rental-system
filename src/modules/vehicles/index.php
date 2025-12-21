@@ -12,7 +12,7 @@ require_once __DIR__ . '/../../includes/header.php';
 // Get database connection
 try {
     $pdo = getDatabaseConnection();
-    
+
     // Fetch available vehicles
     $vehicles_stmt = $pdo->query("
         SELECT * FROM vehicles 
@@ -20,7 +20,7 @@ try {
         ORDER BY created_at DESC
     ");
     $vehicles = $vehicles_stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
 } catch (PDOException $e) {
     $vehicles = [];
     error_log("Database error in vehicles index: " . $e->getMessage());
@@ -64,18 +64,18 @@ try {
                             class="card-img-top h-100 w-100" 
                             alt="<?php echo htmlspecialchars($vehicle['make'] . ' ' . $vehicle['model']); ?>"
                             style="object-fit: cover;">
-                            
+
                             <!-- Status Badge -->
                             <span class="position-absolute top-0 end-0 m-2 badge bg-success">
                                 Available
                             </span>
                         </div>
-                        
+
                         <div class="card-body">
                             <h5 class="card-title text-primary">
                                 <?php echo htmlspecialchars($vehicle['make'] . ' ' . $vehicle['model'] . ' (' . $vehicle['year'] . ')'); ?>
                             </h5>
-                            
+
                             <div class="mb-3">
                                 <div class="row small text-muted">
                                     <div class="col-6">
@@ -96,7 +96,7 @@ try {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <div>
                                     <h4 class="text-success mb-0">

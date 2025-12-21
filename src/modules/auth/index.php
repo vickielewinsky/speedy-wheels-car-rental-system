@@ -1,12 +1,12 @@
 <?php
 require_once __DIR__ . '/../../helpers/url_helper.php';
 
-// If user is logged in → dashboard
+// If user is logged in  dashboard
 if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
     exit;
 }
 
-// Otherwise → login
+// Otherwise  login
 header("Location: login.php");
 exit;

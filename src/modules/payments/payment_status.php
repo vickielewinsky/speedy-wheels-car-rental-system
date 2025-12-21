@@ -26,7 +26,7 @@ $transaction = $mpesa->getTransactionStatus($transaction_code);
                             <i class="fas fa-file-invoice-dollar fa-4x text-info mb-3"></i>
                             <h3>Transaction Details</h3>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="card">
@@ -60,7 +60,7 @@ $transaction = $mpesa->getTransactionStatus($transaction_code);
                                 </div>
                             </div>
                         </div>
-                        
+
                     <?php else: ?>
                         <!-- Transaction Not Found -->
                         <div class="text-center mb-4">
@@ -69,7 +69,7 @@ $transaction = $mpesa->getTransactionStatus($transaction_code);
                             <p>The transaction code "<?php echo htmlspecialchars($transaction_code); ?>" was not found in our system.</p>
                         </div>
                     <?php endif; ?>
-                    
+
                     <!-- Action Buttons -->
                     <div class="mt-4 text-center">
                         <a href="payment.php" class="btn btn-primary">

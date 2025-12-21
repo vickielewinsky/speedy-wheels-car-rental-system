@@ -46,13 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($result['success']) {
                     $_SESSION['success_message'] = "Login successful! Welcome back, " . htmlspecialchars($username) . "!";
-                    
+
                     // Check if there's a redirect URL stored
                     $redirect_url = $_SESSION['redirect_url'] ?? 'index.php';
                     if (isset($_SESSION['redirect_url'])) {
                         unset($_SESSION['redirect_url']);
                     }
-                    
+
                     header("Location: " . base_url($redirect_url));
                     exit;
                 } else {
@@ -101,24 +101,21 @@ if (empty($image_url)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title); ?> - Speedy Wheels</title>
-    
+
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Your Main CSS -->
     <link href="<?php echo base_url('src/assets/css/main.css'); ?>" rel="stylesheet">
-    
+
     <style>
-        /* ============================================
-           BACKGROUND WITH CAR IMAGE
-        ============================================ */
-        
+
         body {
             margin: 0;
             padding: 0;
@@ -127,7 +124,7 @@ if (empty($image_url)) {
             background-color: #f8f9fa;
             padding-top: 80px; /* For navbar */
         }
-        
+
         .background-container {
             position: fixed;
             top: 0;
@@ -137,7 +134,7 @@ if (empty($image_url)) {
             z-index: -3;
             overflow: hidden;
         }
-        
+
         <?php if (!empty($image_url)): ?>
         .background-container::before {
             content: '';
@@ -155,7 +152,7 @@ if (empty($image_url)) {
             filter: blur(0.5px);
         }
         <?php endif; ?>
-        
+
         .background-container::after {
             content: '';
             position: absolute;
@@ -168,7 +165,7 @@ if (empty($image_url)) {
                 rgba(248, 249, 250, 0.96) 100%);
             z-index: -1;
         }
-        
+
         .login-wrapper {
             min-height: calc(100vh - 300px);
             display: flex;
@@ -178,7 +175,7 @@ if (empty($image_url)) {
             position: relative;
             z-index: 1;
         }
-        
+
         .login-box {
             background: white;
             border-radius: 24px;
@@ -192,7 +189,7 @@ if (empty($image_url)) {
             overflow: hidden;
             animation: slideUp 0.6s ease-out;
         }
-        
+
         @keyframes slideUp {
             from {
                 opacity: 0;
@@ -203,10 +200,7 @@ if (empty($image_url)) {
                 transform: translateY(0);
             }
         }
-        
-        /* ============================================
-           ALERT BOXES
-        ============================================ */
+
         .alert-box {
             border-radius: 12px;
             border: none;
@@ -214,19 +208,19 @@ if (empty($image_url)) {
             padding: 18px 20px;
             animation: fadeIn 0.5s ease-out;
         }
-        
+
         .alert-error {
             background: linear-gradient(135deg, #fff5f5 0%, #ffeaea 100%);
             color: #c00;
             border-left: 5px solid #dc3545;
         }
-        
+
         .alert-success {
             background: linear-gradient(135deg, #f0fff4 0%, #e6ffe6 100%);
             color: #0a5;
             border-left: 5px solid #28a745;
         }
-        
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -235,21 +229,18 @@ if (empty($image_url)) {
                 opacity: 1;
             }
         }
-        
-        /* ============================================
-           PROFESSIONAL FORM STYLES
-        ============================================ */
-        
+
+
         .form-container {
             margin-top: 30px;
         }
-        
+
         .form-header {
             text-align: center;
             margin-bottom: 40px;
             position: relative;
         }
-        
+
         .form-icon {
             width: 70px;
             height: 70px;
@@ -261,37 +252,37 @@ if (empty($image_url)) {
             margin: 0 auto 20px;
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
         }
-        
+
         .form-icon i {
             font-size: 28px;
             color: white;
         }
-        
+
         .form-header h2 {
             color: #2c3e50;
             font-weight: 700;
             margin-bottom: 8px;
             font-size: 24px;
         }
-        
+
         .form-subtitle {
             color: #6c757d;
             font-size: 14px;
             margin-bottom: 0;
             font-weight: 400;
         }
-        
+
         .form-field-group {
             margin-bottom: 28px;
         }
-        
+
         .field-label-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-        
+
         .form-label {
             font-weight: 600;
             color: #495057;
@@ -300,22 +291,22 @@ if (empty($image_url)) {
             align-items: center;
             gap: 8px;
         }
-        
+
         .form-label i {
             color: #667eea;
             font-size: 14px;
         }
-        
+
         .required-indicator {
             color: #dc3545;
             font-size: 16px;
             font-weight: bold;
         }
-        
+
         .input-with-icon {
             position: relative;
         }
-        
+
         .input-icon {
             position: absolute;
             left: 18px;
@@ -326,11 +317,11 @@ if (empty($image_url)) {
             z-index: 2;
             transition: color 0.3s ease;
         }
-        
+
         .password-field .input-icon {
             left: 18px;
         }
-        
+
         .modern-input {
             padding: 16px 20px 16px 50px;
             border: 2px solid #e1e8ed;
@@ -344,7 +335,7 @@ if (empty($image_url)) {
             width: 100%;
             box-sizing: border-box;
         }
-        
+
         .modern-input:focus {
             border-color: #667eea;
             background: white;
@@ -352,12 +343,12 @@ if (empty($image_url)) {
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.1);
             padding-left: 50px;
         }
-        
+
         .modern-input::placeholder {
             color: #adb5bd;
             font-weight: 400;
         }
-        
+
         .input-focus-line {
             position: absolute;
             bottom: 0;
@@ -368,11 +359,11 @@ if (empty($image_url)) {
             background: linear-gradient(90deg, #667eea, #764ba2);
             transition: width 0.3s ease;
         }
-        
+
         .modern-input:focus ~ .input-focus-line {
             width: 100%;
         }
-        
+
         .password-toggle {
             position: absolute;
             right: 18px;
@@ -387,11 +378,11 @@ if (empty($image_url)) {
             transition: color 0.3s ease;
             z-index: 2;
         }
-        
+
         .password-toggle:hover {
             color: #667eea;
         }
-        
+
         .field-hint {
             color: #6c757d;
             font-size: 12px;
@@ -401,19 +392,19 @@ if (empty($image_url)) {
             gap: 6px;
             padding-left: 5px;
         }
-        
+
         .field-hint i {
             color: #667eea;
             font-size: 11px;
         }
-        
+
         .form-options-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin: 25px 0 30px;
         }
-        
+
         .modern-checkbox {
             display: flex;
             align-items: center;
@@ -421,7 +412,7 @@ if (empty($image_url)) {
             position: relative;
             user-select: none;
         }
-        
+
         .modern-checkbox input {
             position: absolute;
             opacity: 0;
@@ -429,7 +420,7 @@ if (empty($image_url)) {
             height: 0;
             width: 0;
         }
-        
+
         .checkmark {
             position: relative;
             height: 20px;
@@ -440,16 +431,16 @@ if (empty($image_url)) {
             margin-right: 10px;
             transition: all 0.3s ease;
         }
-        
+
         .modern-checkbox:hover input ~ .checkmark {
             border-color: #667eea;
         }
-        
+
         .modern-checkbox input:checked ~ .checkmark {
             background-color: #667eea;
             border-color: #667eea;
         }
-        
+
         .checkmark:after {
             content: "";
             position: absolute;
@@ -462,17 +453,17 @@ if (empty($image_url)) {
             border-width: 0 2px 2px 0;
             transform: rotate(45deg);
         }
-        
+
         .modern-checkbox input:checked ~ .checkmark:after {
             display: block;
         }
-        
+
         .checkbox-label {
             color: #495057;
             font-size: 14px;
             font-weight: 500;
         }
-        
+
         .forgot-password-link {
             color: #667eea;
             text-decoration: none;
@@ -483,16 +474,16 @@ if (empty($image_url)) {
             align-items: center;
             gap: 6px;
         }
-        
+
         .forgot-password-link:hover {
             color: #764ba2;
             text-decoration: underline;
         }
-        
+
         .forgot-password-link i {
             font-size: 13px;
         }
-        
+
         .submit-button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -511,16 +502,16 @@ if (empty($image_url)) {
             height: 56px;
             box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
         }
-        
+
         .submit-button:hover {
             transform: translateY(-3px);
             box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
         }
-        
+
         .submit-button:active {
             transform: translateY(-1px);
         }
-        
+
         .button-content {
             display: flex;
             align-items: center;
@@ -528,11 +519,11 @@ if (empty($image_url)) {
             gap: 12px;
             transition: opacity 0.3s ease;
         }
-        
+
         .button-text {
             letter-spacing: 0.5px;
         }
-        
+
         .button-loading {
             position: absolute;
             top: 0;
@@ -545,7 +536,7 @@ if (empty($image_url)) {
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        
+
         .divider-with-text {
             display: flex;
             align-items: center;
@@ -554,25 +545,25 @@ if (empty($image_url)) {
             font-size: 13px;
             font-weight: 500;
         }
-        
+
         .divider-line {
             flex: 1;
             height: 1px;
             background: linear-gradient(to right, transparent, #e1e5e9, transparent);
         }
-        
+
         .divider-text {
             padding: 0 15px;
             background: white;
             position: relative;
         }
-        
+
         .social-login-buttons {
             display: flex;
             gap: 15px;
             margin-bottom: 30px;
         }
-        
+
         .social-button {
             flex: 1;
             padding: 14px;
@@ -591,45 +582,45 @@ if (empty($image_url)) {
             font-family: 'Poppins', sans-serif;
             cursor: pointer;
         }
-        
+
         .social-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-        
+
         .google-button {
             color: #DB4437;
             border-color: #e1e5e9;
         }
-        
+
         .google-button:hover {
             background: #f8f9fa;
             border-color: #DB4437;
         }
-        
+
         .microsoft-button {
             color: #00a4ef;
             border-color: #e1e5e9;
         }
-        
+
         .microsoft-button:hover {
             background: #f8f9fa;
             border-color: #00a4ef;
         }
-        
+
         /* Registration Section */
         .registration-section {
             padding: 25px 0;
             border-top: 1px solid #eaeaea;
             margin-top: 25px;
         }
-        
+
         .registration-container {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-        
+
         .registration-icon {
             font-size: 20px;
             color: #667eea;
@@ -637,18 +628,18 @@ if (empty($image_url)) {
             padding: 12px;
             border-radius: 50%;
         }
-        
+
         .registration-text {
             display: flex;
             flex-direction: column;
         }
-        
+
         .registration-question {
             color: #666;
             font-size: 14px;
             margin-bottom: 5px;
         }
-        
+
         .registration-link {
             color: #667eea;
             font-weight: 600;
@@ -659,21 +650,21 @@ if (empty($image_url)) {
             gap: 6px;
             transition: all 0.2s ease;
         }
-        
+
         .registration-link:hover {
             color: #764ba2;
             gap: 10px;
         }
-        
+
         .registration-link i {
             font-size: 12px;
             transition: transform 0.2s ease;
         }
-        
+
         .registration-link:hover i {
             transform: translateX(4px);
         }
-        
+
         /* Demo Accounts Section */
         .demo-section {
             background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
@@ -682,38 +673,38 @@ if (empty($image_url)) {
             margin-top: 35px;
             border: 1px solid rgba(102, 126, 234, 0.1);
         }
-        
+
         .demo-header {
             text-align: center;
             margin-bottom: 25px;
         }
-        
+
         .demo-icon {
             font-size: 24px;
             color: #667eea;
             margin-bottom: 10px;
             display: block;
         }
-        
+
         .demo-title {
             color: #667eea;
             font-weight: 700;
             margin-bottom: 5px;
             font-size: 18px;
         }
-        
+
         .demo-subtitle {
             color: #6c757d;
             font-size: 14px;
             margin-bottom: 0;
         }
-        
+
         .demo-cards {
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
         }
-        
+
         .demo-card {
             flex: 1;
             background: white;
@@ -723,49 +714,49 @@ if (empty($image_url)) {
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
             transition: transform 0.3s ease;
         }
-        
+
         .demo-card:hover {
             transform: translateY(-5px);
         }
-        
+
         .demo-card-header {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-bottom: 15px;
         }
-        
+
         .demo-card-header i {
             font-size: 18px;
         }
-        
+
         .admin-card .demo-card-header i {
             color: #ffc107;
         }
-        
+
         .customer-card .demo-card-header i {
             color: #28a745;
         }
-        
+
         .demo-card-title {
             font-weight: 600;
             color: #495057;
             font-size: 15px;
         }
-        
+
         .demo-credential {
             margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        
+
         .credential-label {
             color: #6c757d;
             font-size: 13px;
             min-width: 70px;
         }
-        
+
         .credential-value {
             background: #f8f9fa;
             padding: 5px 10px;
@@ -775,7 +766,7 @@ if (empty($image_url)) {
             color: #495057;
             border: 1px solid #e1e5e9;
         }
-        
+
         .demo-note {
             margin-top: 15px;
             padding-top: 15px;
@@ -786,7 +777,7 @@ if (empty($image_url)) {
             align-items: center;
             gap: 8px;
         }
-        
+
         .demo-security-notice {
             background: rgba(220, 53, 69, 0.05);
             border: 1px solid rgba(220, 53, 69, 0.2);
@@ -798,57 +789,57 @@ if (empty($image_url)) {
             font-size: 12px;
             color: #dc3545;
         }
-        
+
         .demo-security-notice i {
             font-size: 14px;
         }
-        
+
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .demo-cards {
                 flex-direction: column;
             }
-            
+
             .social-login-buttons {
                 flex-direction: column;
             }
-            
+
             .form-options-row {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 15px;
             }
-            
+
             .registration-container {
                 flex-direction: column;
                 text-align: center;
                 gap: 10px;
             }
-            
+
             .registration-icon {
                 margin-bottom: 5px;
             }
         }
-        
+
         @media (max-width: 480px) {
             .form-header h2 {
                 font-size: 20px;
             }
-            
+
             .form-subtitle {
                 font-size: 13px;
             }
-            
+
             .modern-input {
                 height: 50px;
                 font-size: 14px;
             }
-            
+
             .submit-button {
                 height: 52px;
                 font-size: 15px;
             }
-            
+
             .login-box {
                 padding: 35px 25px;
                 max-width: 95%;
@@ -871,7 +862,7 @@ if (empty($image_url)) {
             <h1>Sign in to Speedy Wheels</h1>
             <p>Enter your credentials to access your account</p>
         </div>
-        
+
         <!-- Error Message -->
         <?php if (!empty($error)): ?>
             <div class="alert-box alert-error">
@@ -898,195 +889,6 @@ if (empty($image_url)) {
             <?php unset($_SESSION['success_message']); ?>
         <?php endif; ?>
 
-        <!-- PROFESSIONAL FORM -->
-        <form method="POST" action="" id="loginForm" class="form-container">
-            <!-- Form Header -->
-            <div class="form-header">
-                <div class="form-icon">
-                    <i class="fas fa-user-shield"></i>
-                </div>
-                <h2>Account Access</h2>
-                <p class="form-subtitle">Enter your credentials to continue</p>
-            </div>
-
-            <!-- Username/Email Field -->
-            <div class="form-field-group">
-                <div class="field-label-container">
-                    <label class="form-label">
-                        <i class="fas fa-envelope"></i>
-                        Email or Username
-                    </label>
-                    <span class="required-indicator">*</span>
-                </div>
-                <div class="input-with-icon">
-                    <i class="input-icon fas fa-user"></i>
-                    <input
-                        type="text"
-                        name="username"
-                        class="form-control modern-input"
-                        placeholder="john.doe@example.com or johndoe"
-                        value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
-                        required
-                        autofocus
-                        autocomplete="username"
-                    >
-                    <div class="input-focus-line"></div>
-                </div>
-                <div class="field-hint">
-                    <i class="fas fa-info-circle"></i>
-                    Enter your registered email address or username
-                </div>
-            </div>
-
-            <!-- Password Field -->
-            <div class="form-field-group">
-                <div class="field-label-container">
-                    <label class="form-label">
-                        <i class="fas fa-key"></i>
-                        Password
-                    </label>
-                    <span class="required-indicator">*</span>
-                </div>
-                <div class="input-with-icon password-field">
-                    <i class="input-icon fas fa-lock"></i>
-                    <input
-                        type="password"
-                        name="password"
-                        class="form-control modern-input"
-                        placeholder="Enter your password"
-                        required
-                        autocomplete="current-password"
-                        id="passwordInput"
-                    >
-                    <button type="button" class="password-toggle" id="togglePassword">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <div class="input-focus-line"></div>
-                </div>
-                <div class="field-hint">
-                    <i class="fas fa-info-circle"></i>
-                    Minimum 8 characters with letters and numbers
-                </div>
-            </div>
-
-            <!-- Options Row -->
-            <div class="form-options-row">
-                <div class="checkbox-container">
-                    <label class="modern-checkbox">
-                        <input type="checkbox" id="rememberMe" name="rememberMe">
-                        <span class="checkmark"></span>
-                        <span class="checkbox-label">Keep me signed in</span>
-                    </label>
-                </div>
-                <a href="#" class="forgot-password-link">
-                    <i class="fas fa-question-circle"></i>
-                    Trouble signing in?
-                </a>
-            </div>
-
-            <!-- Submit Button -->
-            <button type="submit" class="submit-button">
-                <span class="button-content">
-                    <i class="fas fa-sign-in-alt"></i>
-                    <span class="button-text">Sign In to Dashboard</span>
-                </span>
-                <div class="button-loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
-            </button>
-
-            <!-- Divider -->
-            <div class="divider-with-text">
-                <span class="divider-line"></span>
-                <span class="divider-text">or continue with</span>
-                <span class="divider-line"></span>
-            </div>
-
-            <!-- Social Login Buttons -->
-            <div class="social-login-buttons">
-                <button type="button" class="social-button google-button">
-                    <i class="fab fa-google"></i>
-                    <span>Google</span>
-                </button>
-                <button type="button" class="social-button microsoft-button">
-                    <i class="fab fa-microsoft"></i>
-                    <span>Microsoft</span>
-                </button>
-            </div>
-
-            <!-- Registration Link -->
-            <div class="registration-section">
-                <div class="registration-container">
-                    <i class="fas fa-user-plus registration-icon"></i>
-                    <div class="registration-text">
-                        <span class="registration-question">New to Speedy Wheels?</span>
-                        <a href="<?= base_url('src/modules/auth/register.php'); ?>" class="registration-link">
-                            Create an account
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Demo Accounts Section -->
-            <div class="demo-section">
-                <div class="demo-header">
-                    <i class="fas fa-vial demo-icon"></i>
-                    <h3 class="demo-title">Test Accounts</h3>
-                    <p class="demo-subtitle">Use these credentials for testing</p>
-                </div>
-                
-                <div class="demo-cards">
-                    <div class="demo-card admin-card">
-                        <div class="demo-card-header">
-                            <i class="fas fa-crown"></i>
-                            <span class="demo-card-title">Administrator</span>
-                        </div>
-                        <div class="demo-card-content">
-                            <div class="demo-credential">
-                                <span class="credential-label">Username:</span>
-                                <code class="credential-value">admin</code>
-                            </div>
-                            <div class="demo-credential">
-                                <span class="credential-label">Password:</span>
-                                <code class="credential-value">admin123</code>
-                            </div>
-                            <div class="demo-note">
-                                <i class="fas fa-shield-alt"></i>
-                                Full system access
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="demo-card customer-card">
-                        <div class="demo-card-header">
-                            <i class="fas fa-user-tie"></i>
-                            <span class="demo-card-title">Customer</span>
-                        </div>
-                        <div class="demo-card-content">
-                            <div class="demo-credential">
-                                <span class="credential-label">Username:</span>
-                                <code class="credential-value">john_doe</code>
-                            </div>
-                            <div class="demo-credential">
-                                <span class="credential-label">Password:</span>
-                                <code class="credential-value">customer123</code>
-                            </div>
-                            <div class="demo-note">
-                                <i class="fas fa-car"></i>
-                                Booking & rental access
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="demo-security-notice">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>These are demo accounts. For production, use strong, unique passwords.</span>
-                </div>
-            </div>
-        </form>
-        <!-- END OF PROFESSIONAL FORM -->
     </div>
 </div>
 
@@ -1097,7 +899,7 @@ if (empty($image_url)) {
     // Password visibility toggle
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('passwordInput');
-    
+
     if (togglePassword && passwordInput) {
         togglePassword.addEventListener('click', function() {
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -1105,33 +907,33 @@ if (empty($image_url)) {
             this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
         });
     }
-    
+
     // Form submission loading state
     const loginForm = document.getElementById('loginForm');
     const submitButton = loginForm.querySelector('.submit-button');
     const buttonContent = submitButton.querySelector('.button-content');
     const buttonLoading = submitButton.querySelector('.button-loading');
-    
+
     if (loginForm) {
         loginForm.addEventListener('submit', function(e) {
             const username = this.querySelector('[name="username"]').value.trim();
             const password = this.querySelector('[name="password"]').value;
-            
+
             if (!username || !password) {
                 e.preventDefault();
                 showError('Please fill in both fields');
                 return false;
             }
-            
+
             // Show loading state
             buttonContent.style.opacity = '0';
             buttonLoading.style.opacity = '1';
             submitButton.disabled = true;
-            
+
             return true;
         });
     }
-    
+
     function showError(message) {
         // Create error alert if not exists
         let errorAlert = document.querySelector('.alert-error');
@@ -1149,14 +951,14 @@ if (empty($image_url)) {
                 </div>
             `;
             formHeader.parentNode.insertBefore(errorAlert, formHeader.nextSibling);
-            
+
             // Auto remove after 5 seconds
             setTimeout(() => {
                 errorAlert.remove();
             }, 5000);
         }
     }
-    
+
     // Add focus effects
     const inputs = document.querySelectorAll('.modern-input');
     inputs.forEach(input => {
@@ -1167,7 +969,7 @@ if (empty($image_url)) {
             this.parentElement.classList.remove('focused');
         });
     });
-    
+
     // Social button handlers
     document.querySelectorAll('.social-button').forEach(button => {
         button.addEventListener('click', function() {

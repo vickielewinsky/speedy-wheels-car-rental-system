@@ -38,11 +38,11 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
     <a class="navbar-brand fw-bold brand-logo" href="<?= base_url('index.php') ?>">
       <i class="fas fa-car me-2"></i>Speedy Wheels
     </a>
-    
+
     <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
-    
+
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         <!-- Main Navigation Links -->
@@ -66,7 +66,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
             <i class="fas fa-phone me-1"></i>Contact
           </a>
         </li>
-        
+
         <!-- ADMIN LINKS - Only show for admin users -->
         <?php if ($is_admin): ?>
           <li class="nav-item dropdown">
@@ -96,7 +96,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
             </ul>
           </li>
         <?php endif; ?>
-        
+
         <!-- USER AUTH LINKS -->
         <?php if (!$is_logged_in): ?>
           <li class="nav-item ms-2">
@@ -228,7 +228,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
                   </div>
                 <?php endif; ?>
               </div>
-              
+
               <div class="card-body p-3">
                 <h5 class="card-title mb-2"><?= $vehicle_name ?></h5>
                 <div class="mb-3">
@@ -243,7 +243,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
                 </div>
                 <div class="mb-2">
                   <small class="text-muted">
-                    <?= $vehicle['year'] ?> • <?= $vehicle['color'] ?> • <?= $vehicle['plate_no'] ?>
+                    <?= $vehicle['year'] ?>  <?= $vehicle['color'] ?>  <?= $vehicle['plate_no'] ?>
                   </small>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">

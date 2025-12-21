@@ -14,7 +14,7 @@ $user_id = $_SESSION['user_id'];
 
 try {
     $pdo = getDatabaseConnection();
-    
+
     // Fetch user's bookings
     $bookings_stmt = $pdo->prepare("
         SELECT 
@@ -31,7 +31,7 @@ try {
     ");
     $bookings_stmt->execute(['user_id' => $user_id]);
     $bookings = $bookings_stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
 } catch (PDOException $e) {
     $bookings = [];
     error_log("Database error in bookings index: " . $e->getMessage());
@@ -88,7 +88,7 @@ try {
                                 <?php echo ucfirst($booking['status'] ?? 'Pending'); ?>
                             </span>
                         </div>
-                        
+
                         <div class="card-body">
                             <!-- Vehicle Info -->
                             <div class="d-flex mb-3">
@@ -106,7 +106,7 @@ try {
                                     </p>
                                 </div>
                             </div>
-                            
+
                             <!-- Booking Details -->
                             <div class="row small mb-3">
                                 <div class="col-6">
@@ -126,7 +126,7 @@ try {
                                     Ksh <?php echo number_format($booking['daily_rate'], 2); ?>
                                 </div>
                             </div>
-                            
+
                             <!-- Total and Actions -->
                             <div class="d-flex justify-content-between align-items-center border-top pt-3">
                                 <div>

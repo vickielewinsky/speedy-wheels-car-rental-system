@@ -33,10 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'last_name' => $_POST['last_name'] ?? '',
         'phone' => $_POST['phone'] ?? ''
     ];
-    
+
     $auth = new Auth();
     $result = $auth->register($user_data);
-    
+
     if ($result['success']) {
         $_SESSION['success_message'] = $result['message'];
         header("Location: " . login.php);
@@ -74,38 +74,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="username" class="form-label">Username *</label>
                     <input type="text" class="form-control" id="username" name="username" 
                            value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" required>
                     <div class="form-text">Choose a unique username</div>
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="email" class="form-label">Email *</label>
                     <input type="email" class="form-control" id="email" name="email" 
                            value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="phone" class="form-label">Phone Number</label>
                     <input type="tel" class="form-control" id="phone" name="phone" 
                            value="<?php echo htmlspecialchars($_POST['phone'] ?? ''); ?>"
                            placeholder="2547XXXXXXXX">
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="password" class="form-label">Password *</label>
                     <input type="password" class="form-control" id="password" name="password" required>
                     <div class="form-text">Minimum 6 characters</div>
                 </div>
-                
+
                 <button type="submit" class="btn btn-success w-100 py-2">
                     <i class="fas fa-user-plus"></i> Create Account
                 </button>
             </form>
-            
+
             <div class="auth-links">
                 <p>Already have an account? <a href="login.php">Login here</a></p>
             </div>

@@ -3,7 +3,7 @@
 
 class MpesaProcessor {
     private $pdo;
-    
+
     public function __construct() {
         // Use your existing database connection instead of Database class
         try {
@@ -22,7 +22,7 @@ class MpesaProcessor {
         try {
             // Simulate MPESA STK push (replace with actual MPESA API)
             $transactionCode = "MPE" . date('YmdHis') . rand(100, 999);
-            
+
             // Save transaction to database
             $stmt = $this->pdo->prepare("
                 INSERT INTO mpesa_transactions 
@@ -30,13 +30,13 @@ class MpesaProcessor {
                 VALUES (?, ?, ?, ?, 'pending', NOW())
             ");
             $stmt->execute([$transactionCode, $phone, $amount, $bookingId]);
-            
+
             return [
                 'success' => true,
                 'transaction_code' => $transactionCode,
                 'message' => 'Payment initiated successfully'
             ];
-            
+
         } catch (Exception $e) {
             return [
                 'success' => false,
@@ -54,12 +54,12 @@ class MpesaProcessor {
                 WHERE transaction_code = ?
             ");
             $stmt->execute([$transactionCode]);
-            
+
             return [
                 'success' => true,
                 'message' => 'Payment confirmed successfully'
             ];
-            
+
         } catch (Exception $e) {
             return [
                 'success' => false,
@@ -76,9 +76,9 @@ class MpesaProcessor {
             ");
             $stmt->execute([$transactionCode]);
             $transaction = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             return $transaction ?: ['status' => 'not_found'];
-            
+
         } catch (Exception $e) {
             return ['status' => 'error', 'message' => $e->getMessage()];
         }

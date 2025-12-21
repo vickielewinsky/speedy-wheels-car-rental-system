@@ -161,7 +161,7 @@ body {
             <i class="fas fa-home me-1"></i> Home
           </a>
         </li>
-        
+
         <?php if ($is_admin): ?>
           <!-- For Admin Users -->
           <li class="nav-item">
@@ -170,7 +170,7 @@ body {
               <i class="fas fa-car me-1"></i> Manage Vehicles
             </a>
           </li>
-          
+
           <li class="nav-item">
             <a class="nav-link nav-item-custom" 
                href="<?php echo base_url('src/modules/bookings/admin.php'); ?>">
@@ -185,7 +185,7 @@ body {
               <i class="fas fa-car me-1"></i> Browse Vehicles
             </a>
           </li>
-          
+
           <li class="nav-item">
             <a class="nav-link nav-item-custom" 
                href="<?php echo base_url('src/modules/bookings/index.php'); ?>">

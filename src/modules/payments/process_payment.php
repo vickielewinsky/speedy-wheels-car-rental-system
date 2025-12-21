@@ -7,14 +7,14 @@ if ($_POST) {
     $amount = $_POST['amount'] ?? '';
     $booking_id = $_POST['booking_id'] ?? '';
     $vehicle_info = $_POST['vehicle_info'] ?? '';
-    
+
     $mpesa = new MpesaProcessor();
     $result = $mpesa->initiateSTKPush($phone, $amount, $booking_id);
-    
+
     $page_title = "Payment Processing - Speedy Wheels";
     require_once "../../includes/header.php";
     ?>
-    
+
     <div class="container mt-4">
         <div class="row justify-content-center">
             <div class="col-md-8">
@@ -32,7 +32,7 @@ if ($_POST) {
                                 <i class="fas fa-mobile-alt fa-4x text-success mb-3"></i>
                                 <h3 class="text-success">Payment Request Sent!</h3>
                             </div>
-                            
+
                             <div class="alert alert-success">
                                 <h5><i class="fas fa-info-circle"></i> What Happens Next:</h5>
                                 <ol>
@@ -41,7 +41,7 @@ if ($_POST) {
                                     <li>Payment will be confirmed automatically</li>
                                 </ol>
                             </div>
-                            
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="card">
@@ -69,21 +69,21 @@ if ($_POST) {
                                     </div>
                                 </div>
                             </div>
-                            
+
                         <?php else: ?>
                             <!-- FAILED -->
                             <div class="text-center mb-4">
                                 <i class="fas fa-times-circle fa-4x text-danger mb-3"></i>
                                 <h3 class="text-danger">Payment Request Failed</h3>
                             </div>
-                            
+
                             <div class="alert alert-danger">
                                 <h5><i class="fas fa-exclamation-triangle"></i> Error Details:</h5>
                                 <p><?php echo htmlspecialchars($result['error'] ?? 'Unknown error occurred'); ?></p>
                             </div>
-                            
+
                         <?php endif; ?>
-                        
+
                         <!-- Action Buttons -->
                         <div class="mt-4 text-center">
                             <?php if ($result['success']): ?>
@@ -101,7 +101,7 @@ if ($_POST) {
                                 <i class="fas fa-home"></i> Back to Home
                             </a>
                         </div>
-                        
+
                         <!-- MPESA Notice -->
                         <div class="mt-4 alert alert-info">
                             <h6><i class="fas fa-shield-alt"></i> MPESA Payment System</h6>
@@ -112,7 +112,7 @@ if ($_POST) {
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Payment History -->
                 <div class="card mt-4">
                     <div class="card-header">
@@ -128,7 +128,7 @@ if ($_POST) {
                                 "",
                                 [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
                             );
-                            
+
                             $stmt = $pdo->prepare("
                                 SELECT * FROM mpesa_transactions 
                                 WHERE booking_id = ? OR phone = ?
@@ -137,7 +137,7 @@ if ($_POST) {
                             ");
                             $stmt->execute([$booking_id, $phone]);
                             $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                            
+
                             if (count($transactions) > 0) {
                                 echo '<div class="table-responsive">';
                                 echo '<table class="table table-sm table-striped">';
@@ -147,7 +147,7 @@ if ($_POST) {
                                     $status_badge = $transaction['status'] == 'completed' ? 
                                         '<span class="badge bg-success">Completed</span>' : 
                                         '<span class="badge bg-warning">Pending</span>';
-                                    
+
                                     echo '<tr>';
                                     echo '<td>' . htmlspecialchars($transaction['transaction_code']) . '</td>';
                                     echo '<td>' . htmlspecialchars($transaction['phone']) . '</td>';
@@ -169,7 +169,7 @@ if ($_POST) {
             </div>
         </div>
     </div>
-    
+
     <?php
     require_once "../../includes/footer.php";
 } else {

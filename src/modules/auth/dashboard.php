@@ -29,16 +29,16 @@ $admin_data = [];
 if ($is_admin) {
     // Get all registered users (for admin only)
     $admin_data['all_users'] = $auth->getAllUsers();
-    
+
     // Get M-Pesa transactions (for admin only)
     $admin_data['mpesa_transactions'] = $auth->getMpesaTransactions();
-    
+
     // Get system stats (for admin only)
     $admin_data['system_stats'] = $auth->getSystemStats();
-    
+
     // Get recent bookings (for admin only)
     $admin_data['recent_bookings'] = $auth->getRecentBookings(10);
-    
+
     // Get revenue stats (for admin only)
     $admin_data['revenue_stats'] = $auth->getRevenueStats();
 }
@@ -57,7 +57,7 @@ if ($is_admin) {
     <div class="card dashboard-welcome-card text-white p-4 shadow-lg rounded mb-4">
         <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div>
-                <h3>Welcome back, <?php echo htmlspecialchars($current_user['first_name']); ?>! ðŸ‘‹</h3>
+                <h3>Welcome back, <?php echo htmlspecialchars($current_user['first_name']); ?>! ‹</h3>
                 <p>
                     Logged in as 
                     <span class="badge 
@@ -150,7 +150,7 @@ if ($is_admin) {
             </div>
             <div class="card-body">
                 <div class="tab-content" id="adminTabsContent">
-                    
+
                     <!-- All Users Tab -->
                     <div class="tab-pane fade show active" id="users" role="tabpanel">
                         <h5><i class="fas fa-users me-2"></i> Registered Users</h5>
@@ -195,7 +195,7 @@ if ($is_admin) {
                             </table>
                         </div>
                     </div>
-                    
+
                     <!-- M-Pesa Payments Tab -->
                     <div class="tab-pane fade" id="mpesa" role="tabpanel">
                         <h5><i class="fas fa-mobile-alt me-2"></i> M-Pesa Transactions</h5>
@@ -241,7 +241,7 @@ if ($is_admin) {
                             </table>
                         </div>
                     </div>
-                    
+
                     <!-- Recent Bookings Tab -->
                     <div class="tab-pane fade" id="bookings" role="tabpanel">
                         <h5><i class="fas fa-calendar-alt me-2"></i> Recent Bookings</h5>
@@ -281,7 +281,7 @@ if ($is_admin) {
                             </table>
                         </div>
                     </div>
-                    
+
                     <!-- Revenue Tab -->
                     <div class="tab-pane fade" id="revenue" role="tabpanel">
                         <h5><i class="fas fa-chart-line me-2"></i> Revenue Analytics</h5>
@@ -413,7 +413,7 @@ if ($is_admin) {
                 </tr>
             <?php endif; ?>
         </table>
-        
+
         <!-- Action Buttons -->
         <div class="d-flex justify-content-between mt-3">
             <div>
@@ -442,7 +442,7 @@ if ($is_admin) {
         <h4><i class="fas fa-car-side me-2"></i> 
             <?php echo $is_admin ? 'All Bookings' : 'My Bookings'; ?>
         </h4>
-        
+
         <?php if(!empty($bookings)): ?>
             <div class="table-responsive">
                 <table class="table table-hover">

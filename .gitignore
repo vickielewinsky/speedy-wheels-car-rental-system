@@ -115,3 +115,6 @@ yarn-error.log*
 test_*.php
 tests/
 tests/
+check_database_tables.php
+quick_email_test.php
+test_*.php

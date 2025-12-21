@@ -16,11 +16,11 @@ require_once "../../includes/header.php";
 // Get database connection
 try {
     $pdo = getDatabaseConnection();
-    
+
     // Fetch customers
     $customers_stmt = $pdo->query("SELECT * FROM customers ORDER BY created_at DESC");
     $customers = $customers_stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
 } catch (PDOException $e) {
     $customers = [];
     error_log("Database error in customers index: " . $e->getMessage());

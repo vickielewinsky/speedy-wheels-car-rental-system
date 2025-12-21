@@ -2,7 +2,7 @@
 // src/services/ErrorLogger.php
 
 class ErrorLogger {
-    
+
     public static function log($message, $context = [], $level = 'ERROR') {
         $logMessage = "[" . date('Y-m-d H:i:s') . "] [$level] $message " . json_encode($context) . PHP_EOL;
         file_put_contents(__DIR__ . '/../../logs/error.log', $logMessage, FILE_APPEND);

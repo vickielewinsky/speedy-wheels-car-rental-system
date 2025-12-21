@@ -36,7 +36,7 @@ $subtotal = $days * $booking['daily_rate'];
         <p>Receipt #<?php echo htmlspecialchars($booking['reference']); ?></p>
         <hr>
     </div>
-    
+
     <div class="row mb-4">
         <div class="col-md-6">
             <h5><i class="fas fa-user me-2"></i>Customer Information</h5>
@@ -56,7 +56,7 @@ $subtotal = $days * $booking['daily_rate'];
             </table>
         </div>
     </div>
-    
+
     <div class="mb-4">
         <h5><i class="fas fa-car me-2"></i>Vehicle Information</h5>
         <table class="table table-sm">
@@ -65,7 +65,7 @@ $subtotal = $days * $booking['daily_rate'];
             <tr><th>Year:</th><td><?php echo htmlspecialchars($booking['year']); ?></td></tr>
         </table>
     </div>
-    
+
     <div class="mb-4">
         <h5><i class="fas fa-calendar-alt me-2"></i>Rental Details</h5>
         <table class="table table-sm">
@@ -74,7 +74,7 @@ $subtotal = $days * $booking['daily_rate'];
             <tr><th>Duration:</th><td><?php echo $days; ?> days</td></tr>
         </table>
     </div>
-    
+
     <div class="mb-4">
         <h5><i class="fas fa-money-bill-wave me-2"></i>Payment Details</h5>
         <table class="table table-bordered">
@@ -108,7 +108,7 @@ $subtotal = $days * $booking['daily_rate'];
             </tbody>
         </table>
     </div>
-    
+
     <div class="text-center mt-4">
         <p class="text-muted">Thank you for choosing Speedy Wheels!</p>
         <p><small>Receipt generated on: <?php echo date('F j, Y \a\t g:i a'); ?></small></p>

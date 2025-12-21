@@ -14,28 +14,28 @@ $users = [
 foreach ($users as $username => $password) {
     // Create proper password hash
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    
+
     // Update the user in database
     $stmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE username = ?");
     $stmt->execute([$hash, $username]);
-    
+
     $rows = $stmt->rowCount();
-    
+
     if ($rows > 0) {
-        echo "✅ Reset password for <strong>$username</strong> to: <strong>$password</strong><br>";
-        
+        echo " Reset password for <strong>$username</strong> to: <strong>$password</strong><br>";
+
         // Verify it works
         $verify_stmt = $pdo->prepare("SELECT password_hash FROM users WHERE username = ?");
         $verify_stmt->execute([$username]);
         $user = $verify_stmt->fetch();
-        
+
         if (password_verify($password, $user['password_hash'])) {
-            echo "&nbsp;&nbsp;✅ Password verification SUCCESS<br>";
+            echo "&nbsp;&nbsp; Password verification SUCCESS<br>";
         } else {
-            echo "&nbsp;&nbsp;❌ Password verification FAILED<br>";
+            echo "&nbsp;&nbsp; Password verification FAILED<br>";
         }
     } else {
-        echo "❌ User <strong>$username</strong> not found in database<br>";
+        echo " User <strong>$username</strong> not found in database<br>";
     }
     echo "<br>";
 }

@@ -15,7 +15,7 @@ if (file_exists($db_config_path)) {
 // Get database connection
 try {
     $pdo = getDatabaseConnection();
-    
+
     // Fetch available vehicles - using correct column names from your schema
     $vehicles_stmt = $pdo->query("SELECT 
         vehicle_id, 
@@ -28,7 +28,7 @@ try {
         status 
         FROM vehicles WHERE status = 'available'");
     $vehicles = $vehicles_stmt->fetchAll();
-    
+
     // Fetch customers - using correct column names from your schema
     $customers_stmt = $pdo->query("SELECT 
         customer_id,
@@ -40,7 +40,7 @@ try {
         address
         FROM customers");
     $customers = $customers_stmt->fetchAll();
-    
+
 } catch (PDOException $e) {
     $vehicles = [];
     $customers = [];
@@ -81,7 +81,7 @@ try {
                             <h6 class="form-section-header">
                                 <i class="fas fa-user me-2"></i>Customer Information
                             </h6>
-                            
+
                             <!-- Customer Selection Tabs -->
                             <ul class="nav nav-pills mb-3 customer-tabs" id="customerTab" role="tablist">
                                 <li class="nav-item" role="presentation">
@@ -97,7 +97,7 @@ try {
                                     </button>
                                 </li>
                             </ul>
-                            
+
                             <div class="tab-content" id="customerTabContent">
                                 <!-- Existing Customer Tab -->
                                 <div class="tab-pane fade show active" id="existing-customer" role="tabpanel">
@@ -124,7 +124,7 @@ try {
                                         <div id="customerDetailsContent"></div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- New Customer Tab -->
                                 <div class="tab-pane fade" id="new-customer" role="tabpanel">
                                     <div class="mb-3">
@@ -169,7 +169,7 @@ try {
                             <h6 class="form-section-header">
                                 <i class="fas fa-car me-2"></i>Vehicle Selection
                             </h6>
-                            
+
                             <div class="mb-3">
                                 <label for="vehicle_id" class="form-label">Select Vehicle *</label>
                                 <select class="form-select" id="vehicle_id" name="vehicle_id" required>
@@ -184,7 +184,7 @@ try {
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label class="form-label">Vehicle Details</label>
                                 <div id="vehicleDetails" class="vehicle-details-panel text-muted small">
@@ -202,7 +202,7 @@ try {
                             <h6 class="form-section-header">
                                 <i class="fas fa-calendar-alt me-2"></i>Rental Period
                             </h6>
-                            
+
                             <div class="row date-picker-group">
                                 <div class="col-md-6 mb-3">
                                     <label for="start_date" class="form-label">Start Date *</label>
@@ -215,7 +215,7 @@ try {
                                            min="<?php echo date('Y-m-d'); ?>" required>
                                 </div>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label class="form-label">Rental Duration</label>
                                 <div id="rentalDuration" class="rental-duration-display text-muted">
@@ -250,7 +250,7 @@ try {
                             <h6 class="form-section-header">
                                 <i class="fas fa-money-bill-wave me-2"></i>Pricing Summary
                             </h6>
-                            
+
                             <div class="pricing-summary p-3 rounded mb-3">
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Daily Rate:</span>
@@ -294,7 +294,7 @@ try {
                             <h6 class="form-section-header">
                                 <i class="fas fa-info-circle me-2"></i>Additional Information
                             </h6>
-                            
+
                             <div class="mb-3">
                                 <label for="special_requests" class="form-label">Special Requests or Notes</label>
                                 <textarea class="form-control" id="special_requests" name="special_requests" rows="3" 
@@ -340,11 +340,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Customer tab functionality
     const customerTab = new bootstrap.Tab(document.getElementById('existing-customer-tab'));
-    
+
     // Show customer details when existing customer is selected
     customerSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
-        
+
         if (selectedOption.value) {
             const name = selectedOption.getAttribute('data-name');
             const phone = selectedOption.getAttribute('data-phone');
@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const idNumber = selectedOption.getAttribute('data-id-number');
             const dlNumber = selectedOption.getAttribute('data-dl-number');
             const address = selectedOption.getAttribute('data-address');
-            
+
             customerDetailsContent.innerHTML = `
                 <p><strong>Name:</strong> ${name}</p>
                 <p><strong>Phone:</strong> ${phone}</p>
@@ -362,10 +362,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p><strong>Address:</strong> ${address || 'Not provided'}</p>
             `;
             existingCustomerDetails.style.display = 'block';
-            
+
             // Switch to existing customer tab
             document.getElementById('existing-customer-tab').click();
-            
+
             // Clear new customer fields
             newCustomerFields.forEach(field => field.value = '');
         } else {
@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
     vehicleSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         const dailyRate = selectedOption.getAttribute('data-daily-rate');
-        
+
         if (dailyRate) {
             dailyRateSpan.textContent = 'KSh ' + parseFloat(dailyRate).toLocaleString('en-KE', {minimumFractionDigits: 2});
             vehicleDetailsDiv.innerHTML = `
@@ -406,11 +406,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateDates() {
         const startDate = new Date(startDateInput.value);
         const endDate = new Date(endDateInput.value);
-        
+
         if (startDate && endDate && endDate > startDate) {
             const timeDiff = endDate - startDate;
             const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-            
+
             numberOfDaysSpan.textContent = daysDiff;
             rentalDurationDiv.innerHTML = `
                 <strong>${daysDiff} day${daysDiff !== 1 ? 's' : ''}</strong><br>
@@ -438,7 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const insuranceOption = document.querySelector('input[name="insurance_option"]:checked').value;
         const insuranceCost = insuranceOption === 'premium' ? 500 * days : 0;
         const total = (dailyRate * days) + insuranceCost;
-        
+
         totalAmountSpan.textContent = 'KSh ' + total.toLocaleString('en-KE', {minimumFractionDigits: 2});
     }
 
@@ -449,14 +449,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const customerId = document.getElementById('customer_id').value;
         const customerName = document.querySelector('input[name="customer_name"]').value;
         const activeTab = document.querySelector('#customerTab .nav-link.active').id;
-        
+
         // Validate rental dates
         if (endDate <= startDate) {
             e.preventDefault();
             alert('End date must be after start date.');
             return false;
         }
-        
+
         // Validate vehicle selection
         if (!vehicleSelect.value) {
             e.preventDefault();

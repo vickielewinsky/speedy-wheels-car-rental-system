@@ -46,7 +46,7 @@ class Auth {
             $_SESSION['is_logged_in'] = true;
 
             return ['success' => true];
-            
+
         } catch (PDOException $e) {
             return ['success' => false, 'error' => 'Database error: ' . $e->getMessage()];
         }
@@ -82,7 +82,7 @@ class Auth {
             ");
             $stmt->execute(['user_id' => $user_id]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-            
+
         } catch (PDOException $e) {
             error_log("Error in getUserBookings: " . $e->getMessage());
             return [];
@@ -168,28 +168,28 @@ class Auth {
      */
     public function getSystemStats() {
         $stats = [];
-        
+
         try {
             // Total users
             $stmt = $this->pdo->prepare("SELECT COUNT(*) as total FROM users");
             $stmt->execute();
             $stats['total_users'] = $stmt->fetchColumn() ?: 0;
-            
+
             // Total bookings
             $stmt = $this->pdo->prepare("SELECT COUNT(*) as total FROM bookings");
             $stmt->execute();
             $stats['total_bookings'] = $stmt->fetchColumn() ?: 0;
-            
+
             // M-Pesa transactions
             $stmt = $this->pdo->prepare("SELECT COUNT(*) as total FROM mpesa_transactions WHERE status = 'completed'");
             $stmt->execute();
             $stats['mpesa_transactions'] = $stmt->fetchColumn() ?: 0;
-            
+
             // Available vehicles
             $stmt = $this->pdo->prepare("SELECT COUNT(*) as total FROM vehicles WHERE status = 'available'");
             $stmt->execute();
             $stats['available_vehicles'] = $stmt->fetchColumn() ?: 0;
-            
+
         } catch (Exception $e) {
             error_log("Error in getSystemStats: " . $e->getMessage());
             // Set defaults
@@ -200,7 +200,7 @@ class Auth {
                 'available_vehicles' => 0
             ];
         }
-        
+
         return $stats;
     }
 
@@ -235,13 +235,13 @@ class Auth {
      */
     public function getRevenueStats() {
         $stats = [];
-        
+
         try {
             // Total revenue from bookings
             $stmt = $this->pdo->prepare("SELECT SUM(total_price) as total FROM bookings WHERE payment_status = 'paid'");
             $stmt->execute();
             $stats['total_revenue'] = $stmt->fetchColumn() ?: 0;
-            
+
             // Monthly revenue
             $stmt = $this->pdo->prepare("
                 SELECT SUM(total_price) as total FROM bookings 
@@ -251,7 +251,7 @@ class Auth {
             ");
             $stmt->execute();
             $stats['monthly_revenue'] = $stmt->fetchColumn() ?: 0;
-            
+
             // Weekly revenue
             $stmt = $this->pdo->prepare("
                 SELECT SUM(total_price) as total FROM bookings 
@@ -260,7 +260,7 @@ class Auth {
             ");
             $stmt->execute();
             $stats['weekly_revenue'] = $stmt->fetchColumn() ?: 0;
-            
+
             // Calculate daily average
             if ($stats['total_revenue'] > 0) {
                 $stmt = $this->pdo->prepare("
@@ -272,7 +272,7 @@ class Auth {
             } else {
                 $stats['daily_average'] = 0;
             }
-            
+
         } catch (Exception $e) {
             error_log("Error in getRevenueStats: " . $e->getMessage());
             // Set defaults
@@ -283,7 +283,7 @@ class Auth {
                 'daily_average' => 0
             ];
         }
-        
+
         return $stats;
     }
 
@@ -323,13 +323,13 @@ class Auth {
      */
     public function getPaymentStats() {
         $stats = [];
-        
+
         try {
             // Get total bookings count
             $stmt = $this->pdo->prepare("SELECT COUNT(*) as total FROM bookings");
             $stmt->execute();
             $totalBookings = $stmt->fetchColumn();
-            
+
             if ($totalBookings > 0) {
                 // Count by payment status
                 $stmt = $this->pdo->prepare("
@@ -341,7 +341,7 @@ class Auth {
                 ");
                 $stmt->execute();
                 $paymentCounts = $stmt->fetch(PDO::FETCH_ASSOC);
-                
+
                 $stats['paid_percent'] = round(($paymentCounts['paid_count'] / $totalBookings) * 100, 2);
                 $stats['pending_percent'] = round(($paymentCounts['pending_count'] / $totalBookings) * 100, 2);
                 $stats['failed_percent'] = round(($paymentCounts['failed_count'] / $totalBookings) * 100, 2);
@@ -350,7 +350,7 @@ class Auth {
                 $stats['pending_percent'] = 0;
                 $stats['failed_percent'] = 0;
             }
-            
+
         } catch (Exception $e) {
             error_log("Error in getPaymentStats: " . $e->getMessage());
             $stats = [
@@ -359,7 +359,7 @@ class Auth {
                 'failed_percent' => 0
             ];
         }
-        
+
         return $stats;
     }
 
@@ -369,7 +369,7 @@ class Auth {
     public function isAdmin() {
         $user = $this->getCurrentUser();
         if (!$user) return false;
-        
+
         $role = strtolower($user['user_role'] ?? '');
         return in_array($role, ['admin', 'superadmin']);
     }

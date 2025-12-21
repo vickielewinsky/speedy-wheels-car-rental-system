@@ -12,7 +12,7 @@ require_once __DIR__ . '/../../includes/header.php';
 // Get database connection
 try {
     $pdo = getDatabaseConnection();
-    
+
     // Fetch all bookings with user and vehicle details
     $bookings_stmt = $pdo->query("
         SELECT 
@@ -29,7 +29,7 @@ try {
         ORDER BY b.created_at DESC
     ");
     $bookings = $bookings_stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
 } catch (PDOException $e) {
     $bookings = [];
     error_log("Database error in bookings admin: " . $e->getMessage());

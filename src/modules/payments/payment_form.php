@@ -35,15 +35,15 @@ $mpesa = new MpesaProcessor();
                         <div class="row">
                             <div class="col-6"><strong>Vehicle:</strong></div>
                             <div class="col-6"><?php echo htmlspecialchars($vehicle_info); ?></div>
-                            
+
                             <div class="col-6"><strong>Amount:</strong></div>
                             <div class="col-6">KES <?php echo number_format($amount, 2); ?></div>
-                            
+
                             <div class="col-6"><strong>Booking ID:</strong></div>
                             <div class="col-6">#<?php echo $booking_id; ?></div>
                         </div>
                     </div>
-                    
+
                     <!-- Payment Form -->
                     <form method="POST" action="process_payment.php">
                         <div class="mb-3">
@@ -55,16 +55,16 @@ $mpesa = new MpesaProcessor();
                                    title="Format: 2547XXXXXXXX">
                             <div class="form-text">Enter your MPESA registered phone number</div>
                         </div>
-                        
+
                         <input type="hidden" name="booking_id" value="<?php echo $booking_id; ?>">
                         <input type="hidden" name="amount" value="<?php echo $amount; ?>">
                         <input type="hidden" name="vehicle_info" value="<?php echo htmlspecialchars($vehicle_info); ?>">
-                        
+
                         <button type="submit" class="btn btn-success w-100 py-3">
                             <i class="fas fa-bolt"></i> PAY KES <?php echo number_format($amount, 2); ?> VIA MPESA
                         </button>
                     </form>
-                    
+
                     <!-- Demo Instructions -->
                     <div class="mt-4 alert alert-warning">
                         <h6><i class="fas fa-info-circle"></i> Demo Instructions</h6>

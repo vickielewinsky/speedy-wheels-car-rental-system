@@ -25,17 +25,17 @@
           <a href="https://wa.me/254712345678" class="btn btn-success btn-sm mx-1 mb-2" target="_blank" title="Contact on WhatsApp">
             <i class="fab fa-whatsapp"></i> WhatsApp
           </a>
-          
+
           <!-- GitHub -->
           <a href="https://github.com/vickielewinsky" class="btn btn-outline-light btn-sm mx-1 mb-2" target="_blank" title="View GitHub Profile">
             <i class="fab fa-github"></i> GitHub
           </a>
-          
+
           <!-- LinkedIn -->
           <a href="https://www.linkedin.com/in/vickie-lewinsky-038474291" class="btn btn-primary btn-sm mx-1 mb-2" target="_blank" title="View LinkedIn Profile">
             <i class="fab fa-linkedin"></i> LinkedIn
           </a>
-          
+
           <!-- Gmail -->
           <a href="mailto:lewinskyvictoria45@gmail.com" class="btn btn-danger btn-sm mx-1 mb-2" title="Send Email">
             <i class="fas fa-envelope"></i> Gmail

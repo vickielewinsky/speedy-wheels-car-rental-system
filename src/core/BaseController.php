@@ -34,7 +34,7 @@ class BaseController
      */
     protected function redirect(string $url): void
     {
-        // Absolute URL → redirect as-is
+        // Absolute URL  redirect as-is
         if (preg_match('#^https?://#i', $url)) {
             header("Location: $url");
             exit;

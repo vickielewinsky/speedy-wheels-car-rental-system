@@ -8,19 +8,19 @@ ini_set('display_errors', 1);
 if ($_POST) {
     $page_title = "Booking Confirmation - Speedy Wheels";
     require_once "../../includes/header.php";
-    
+
     // Use the same database connection method as create_booking.php
     $root_dir = dirname(__DIR__, 2);
     $db_config_path = $root_dir . '/config/database.php';
-    
+
     if (file_exists($db_config_path)) {
         require_once $db_config_path;
     }
-    
+
     try {
         // Get database connection using the same method as create_booking.php
         $pdo = getDatabaseConnection();
-        
+
         if (!$pdo) {
             throw new Exception("Could not connect to database.");
         }
@@ -33,7 +33,7 @@ if ($_POST) {
         $customer_id_number = $_POST['customer_id_number'] ?? '';
         $customer_dl_number = $_POST['customer_dl_number'] ?? '';
         $customer_address = $_POST['customer_address'] ?? 'Not specified';
-        
+
         $vehicle_id = $_POST['vehicle_id'] ?? '';
         $start_date = $_POST['start_date'] ?? '';
         $end_date = $_POST['end_date'] ?? '';
@@ -49,11 +49,11 @@ if ($_POST) {
             $customer_stmt = $pdo->prepare($customer_query);
             $customer_stmt->execute([$customer_id]);
             $existing_customer = $customer_stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if (!$existing_customer) {
                 throw new Exception("Selected customer not found.");
             }
-            
+
             $customer_name = $existing_customer['name'];
             $customer_phone = $existing_customer['phone'];
             $customer_id_number = $existing_customer['id_number'];
@@ -76,7 +76,7 @@ if ($_POST) {
         $start = new DateTime($start_date);
         $end = new DateTime($end_date);
         $rental_days = $start->diff($end)->days;
-        
+
         if ($rental_days < 1) {
             throw new Exception("Rental period must be at least 1 day.");
         }
@@ -153,27 +153,25 @@ if ($_POST) {
         // Commit transaction
         $pdo->commit();
 
-        // =============================================
         // EMAIL NOTIFICATION - BOOKING CONFIRMATION
-        // =============================================
         $emailSent = false;
         $emailMessage = '';
-        
+
         if (!empty($customer_email) && filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
             try {
                 // Include the email service
                 $emailServicePath = $root_dir . '/src/services/EmailService.php';
                 if (file_exists($emailServicePath)) {
                     require_once $emailServicePath;
-                    
+
                     // Load PHPMailer autoloader
                     $autoloadPath = $root_dir . '/vendor/autoload.php';
                     if (file_exists($autoloadPath)) {
                         require_once $autoloadPath;
                     }
-                    
+
                     $emailService = new EmailService();
-                    
+
                     $bookingData = [
                         'booking_id' => $booking_id,
                         'vehicle' => $vehicle['make'] . ' ' . $vehicle['model'] . ' (' . $vehicle['plate_no'] . ')',
@@ -183,9 +181,9 @@ if ($_POST) {
                         'total_amount' => number_format($total_amount, 2),
                         'rental_days' => $rental_days
                     ];
-                    
+
                     $emailSent = $emailService->sendBookingConfirmation($bookingData, $customer_email, $customer_name);
-                    
+
                     if ($emailSent) {
                         $emailMessage = '<div class="alert alert-success mt-3">
                                             <i class="fas fa-envelope me-2"></i>
@@ -231,7 +229,7 @@ if ($_POST) {
                         </div>
                         <div class="card-body">
                             <div class="alert alert-success">
-                                <h5>🎉 Booking Successfully Created!</h5>
+                                <h5> Booking Successfully Created!</h5>
                                 <p class="mb-0">Your booking has been confirmed. Proceed to payment to secure your vehicle.</p>
                             </div>
 
@@ -296,7 +294,7 @@ if ($_POST) {
                             <div class="mt-4 text-center">
                                 <h5><i class="fas fa-credit-card"></i> Payment Options</h5>
                                 <p>Secure your booking by completing payment via MPESA</p>
-                                
+
                                 <div class="d-grid gap-2 col-md-8 mx-auto">
                                     <a href="../payments/payment.php?booking_id=<?php echo $booking_id; ?>&amount=<?php echo $total_amount; ?>&vehicle=<?php echo urlencode($vehicle['make'] . ' ' . $vehicle['model'] . ' (' . $vehicle['plate_no'] . ')'); ?>" 
                                        class="btn btn-success btn-lg">
@@ -339,7 +337,7 @@ if ($_POST) {
         if (isset($pdo) && $pdo->inTransaction()) {
             $pdo->rollBack();
         }
-        
+
         echo '<div class="container mt-4">
                 <div class="row justify-content-center">
                     <div class="col-md-8">

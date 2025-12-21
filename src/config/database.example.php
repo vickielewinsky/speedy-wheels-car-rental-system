@@ -12,7 +12,7 @@ class DatabaseConfig {
     const USERNAME = 'YOUR_DB_USERNAME';
     const PASSWORD = '';
     const CHARSET = 'utf8mb4';
-    
+
     // PDO options
     const OPTIONS = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -27,16 +27,16 @@ class DatabaseConfig {
 function getDatabaseConnection() {
     try {
         $dsn = "mysql:host=" . DatabaseConfig::HOST . ";dbname=" . DatabaseConfig::DBNAME . ";charset=" . DatabaseConfig::CHARSET;
-        
+
         $pdo = new PDO(
             $dsn,
             DatabaseConfig::USERNAME,
             DatabaseConfig::PASSWORD,
             DatabaseConfig::OPTIONS
         );
-        
+
         return $pdo;
-        
+
     } catch (PDOException $e) {
         // Log error and display user-friendly message
         error_log("Database Connection Failed: " . $e->getMessage());

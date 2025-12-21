@@ -65,7 +65,7 @@ if (!$user) {
             </table>
         </div>
     </div>
-    
+
     <div class="mt-3">
         <h5>Recent Bookings</h5>
         <?php
@@ -81,7 +81,7 @@ if (!$user) {
         ");
         $stmt->execute(['user_id' => $user_id]);
         $recentBookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         if (!empty($recentBookings)) {
             echo "<div class='list-group'>";
             foreach ($recentBookings as $booking) {

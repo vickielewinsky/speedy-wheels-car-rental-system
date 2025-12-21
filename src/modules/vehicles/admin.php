@@ -12,11 +12,11 @@ require_once __DIR__ . '/../../includes/header.php';
 // Get database connection
 try {
     $pdo = getDatabaseConnection();
-    
+
     // Fetch all vehicles
     $vehicles_stmt = $pdo->query("SELECT * FROM vehicles ORDER BY created_at DESC");
     $vehicles = $vehicles_stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
 } catch (PDOException $e) {
     $vehicles = [];
     error_log("Database error in vehicles admin: " . $e->getMessage());
@@ -72,7 +72,7 @@ try {
                                         <strong><?php echo htmlspecialchars($vehicle['make'] . ' ' . $vehicle['model']); ?></strong>
                                         <br>
                                         <small class="text-muted">
-                                            <?php echo htmlspecialchars($vehicle['year'] . ' • ' . $vehicle['color']); ?>
+                                            <?php echo htmlspecialchars($vehicle['year'] . '  ' . $vehicle['color']); ?>
                                         </small>
                                     </td>
                                     <td>

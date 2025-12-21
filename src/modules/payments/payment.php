@@ -16,7 +16,7 @@ require_once "../../includes/header.php";
 // Get database connection
 try {
     $pdo = getDatabaseConnection();
-    
+
     // Fetch payment history with customer and booking details
     $payments_stmt = $pdo->query("
         SELECT 
@@ -42,7 +42,7 @@ try {
         ORDER BY p.created_at DESC
     ");
     $payments = $payments_stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     // Get payment statistics
     $stats_stmt = $pdo->query("
         SELECT 
@@ -53,7 +53,7 @@ try {
         FROM payments
     ");
     $stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
-    
+
 } catch (PDOException $e) {
     $payments = [];
     $stats = ['total_payments' => 0, 'total_revenue' => 0, 'average_payment' => 0, 'completed_payments' => 0];
