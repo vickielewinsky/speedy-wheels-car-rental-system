@@ -10,4 +10,10 @@ class Environment {
     public static function isDevelopment() {
         return self::get() === self::DEVELOPMENT;
     }
+
+    // Add this method to fix the error
+    public static function isDebug() {
+        // Usually debug is true in development, false in production
+        return self::isDevelopment();
+    }
 }
