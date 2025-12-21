@@ -1,280 +1,293 @@
 <?php
-// contact.php
-header("Cache-Control: no-cache, no-store, must-revalidate");
-header("Pragma: no-cache");
-header("Expires: 0");
-
+// contact.php - FULL UPDATED VERSION WITH SELF-CONTAINED NAVBAR AND CONTACT PAGE
 require_once __DIR__ . '/src/config/config.php';
-require_once __DIR__ . '/src/config/database.php';
+
 $page_title = "Contact Us - Speedy Wheels";
 
-include __DIR__ . '/src/includes/header.php';
+$success = false;
+$error = '';
 
-// Check user login (session already started in header.php)
-$is_logged_in = isset($_SESSION['user_id']);
-$is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $subject = trim($_POST['subject'] ?? '');
+    $message = trim($_POST['message'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+
+    if (empty($name) || empty($email) || empty($subject) || empty($message)) {
+        $error = "Please fill in all required fields.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = "Please enter a valid email address.";
+    } else {
+        $success = true;
+        $log = date('Y-m-d H:i:s') . " | $name | $email | $subject\n";
+        @file_put_contents(__DIR__ . '/contact_log.txt', $log, FILE_APPEND);
+    }
+}
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title><?php echo $page_title; ?></title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+/* Navbar Styles */
+.navbar {
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.navbar .nav-link {
+    color: white !important;
+    font-weight: 500;
+    margin: 0 10px;
+    transition: all 0.3s ease;
+}
+.navbar .nav-link:hover, .navbar .nav-link.active {
+    color: #ffdd57 !important;
+    text-shadow: 0 0 5px rgba(255,255,255,0.7);
+}
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: white !important;
+    text-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
 
-<!-- ENHANCED ATTRACTIVE NAVIGATION -->
-<nav class="navbar navbar-expand-lg navbar-dark fixed-top custom-navbar">
-  <div class="container">
-    <!-- Brand with enhanced styling -->
-    <a class="navbar-brand fw-bold brand-logo" href="<?= base_url('index.php') ?>">
-      <i class="fas fa-car me-2"></i>Speedy Wheels
-    </a>
-    
-    <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <!-- Main Navigation Links -->
-        <li class="nav-item">
-          <a class="nav-link nav-item-custom" href="<?= base_url('index.php') ?>">
-            <i class="fas fa-home me-1"></i>Home
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link nav-item-custom" href="<?= base_url('about.php') ?>">
-            <i class="fas fa-info-circle me-1"></i>About Us
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link nav-item-custom" href="<?= base_url('index.php#how-it-works') ?>">
-            <i class="fas fa-play-circle me-1"></i>How It Works
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link nav-item-custom active" href="<?= base_url('contact.php') ?>">
-            <i class="fas fa-phone me-1"></i>Contact
-          </a>
-        </li>
-        
-        <!-- ADMIN LINKS - Only show for admin users -->
-        <?php if ($is_admin): ?>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle nav-item-custom admin-dropdown" href="#" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-crown me-1"></i>Admin Panel
-            </a>
-            <ul class="dropdown-menu admin-dropdown-menu">
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/vehicles/index.php') ?>">
-                <i class="fas fa-car text-primary me-2"></i>Manage Vehicles
-              </a></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/bookings/index.php') ?>">
-                <i class="fas fa-calendar-check text-success me-2"></i>Manage Bookings
-              </a></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/customers/index.php') ?>">
-                <i class="fas fa-users text-info me-2"></i>Manage Customers
-              </a></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/payments/payment.php') ?>">
-                <i class="fas fa-file-invoice-dollar text-warning me-2"></i>Payment History
-              </a></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/reports/index.php') ?>">
-                <i class="fas fa-chart-line text-danger me-2"></i>Reports
-              </a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/auth/dashboard.php') ?>">
-                <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
-              </a></li>
-            </ul>
-          </li>
-        <?php endif; ?>
-        
-        <!-- USER AUTH LINKS -->
-        <?php if (!$is_logged_in): ?>
-          <li class="nav-item ms-2">
-            <a class="btn btn-gradient-primary signin-btn" href="<?= base_url('src/modules/auth/login.php') ?>">
-              <i class="fas fa-user me-1"></i>Sign In
-            </a>
-          </li>
-        <?php else: ?>
-          <li class="nav-item dropdown ms-2">
-            <a class="btn btn-gradient-user user-dropdown-toggle dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-user-circle me-1"></i><?= htmlspecialchars($_SESSION['username'] ?? 'User') ?>
-            </a>
-            <ul class="dropdown-menu user-dropdown-menu">
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/auth/dashboard.php') ?>">
-                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-              </a></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/bookings/create_booking.php') ?>">
-                <i class="fas fa-plus me-2"></i>New Booking
-              </a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/auth/logout.php') ?>">
-                <i class="fas fa-sign-out-alt me-2"></i>Logout
-              </a></li>
-            </ul>
-          </li>
-        <?php endif; ?>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<!-- CONTACT HERO -->
-<section class="hero-section" style="
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 50vh;
+/* Hero Banner */
+.contact-hero {
+    position: relative;
+    background: linear-gradient(rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8)),
+                url('<?php echo base_url('src/assets/images/hero-car.png'); ?>') center/cover no-repeat;
+    height: 350px;
     display: flex;
     align-items: center;
+    justify-content: center;
     color: white;
-    padding-top: 80px;">
-  <div class="container">
-    <div class="row justify-content-center text-center">
-      <div class="col-lg-8">
-        <h1 class="display-3 fw-bold mb-4">Contact Us</h1>
-        <p class="lead">Get in touch with our team - We're here to help you 24/7</p>
-      </div>
-    </div>
-  </div>
-</section>
+}
+.contact-hero h1 {
+    font-size: 3rem;
+    font-weight: bold;
+}
+.contact-hero p {
+    font-size: 1.2rem;
+}
 
-<!-- CONTACT CONTENT -->
-<section class="py-5 bg-white">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 mx-auto">
-        <div class="row">
-          <!-- Contact Information -->
-          <div class="col-md-6 mb-5">
-            <h3 class="mb-4">Get In Touch</h3>
-            
-            <div class="d-flex mb-4">
-              <div class="flex-shrink-0">
-                <i class="fas fa-map-marker-alt text-primary fa-2x"></i>
-              </div>
-              <div class="flex-grow-1 ms-3">
-                <h5>Our Location</h5>
-                <p class="text-muted mb-0">
-                  Mombasa CBD<br>
-                  Near Nyali Cinemax<br>
-                  Mombasa, Kenya
-                </p>
-              </div>
-            </div>
-
-            <div class="d-flex mb-4">
-              <div class="flex-shrink-0">
-                <i class="fas fa-phone text-success fa-2x"></i>
-              </div>
-              <div class="flex-grow-1 ms-3">
-                <h5>Phone Numbers</h5>
-                <p class="text-muted mb-0">
-                  +254 799 692 055<br>
-                  +254 700 000 000
-                </p>
-              </div>
-            </div>
-
-            <div class="d-flex mb-4">
-              <div class="flex-shrink-0">
-                <i class="fas fa-envelope text-warning fa-2x"></i>
-              </div>
-              <div class="flex-grow-1 ms-3">
-                <h5>Email Address</h5>
-                <p class="text-muted mb-0">
-                  lewinskyvictoria45@gmail.com<br>
-                  info@speedywheels.com
-                </p>
-              </div>
-            </div>
-
-            <div class="d-flex mb-4">
-              <div class="flex-shrink-0">
-                <i class="fas fa-clock text-info fa-2x"></i>
-              </div>
-              <div class="flex-grow-1 ms-3">
-                <h5>Working Hours</h5>
-                <p class="text-muted mb-0">
-                  Monday - Sunday: 24/7<br>
-                  Emergency Support: Always Available
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Contact Form -->
-          <div class="col-md-6">
-            <h3 class="mb-4">Send Message</h3>
-            <form id="contactForm">
-              <div class="mb-3">
-                <label for="name" class="form-label">Your Name</label>
-                <input type="text" class="form-control" id="name" required>
-              </div>
-              <div class="mb-3">
-                <label for="email" class="form-label">Your Email</label>
-                <input type="email" class="form-control" id="email" required>
-              </div>
-              <div class="mb-3">
-                <label for="subject" class="form-label">Subject</label>
-                <input type="text" class="form-control" id="subject" required>
-              </div>
-              <div class="mb-3">
-                <label for="message" class="form-label">Message</label>
-                <textarea class="form-control" id="message" rows="5" required></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary btn-lg w-100">
-                <i class="fas fa-paper-plane me-2"></i>Send Message
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- MAP SECTION -->
-<section class="py-5" style="background: #f8f9fa;">
-  <div class="container">
-    <div class="row">
-      <div class="col-12 text-center mb-4">
-        <h2 class="display-5">Find Us</h2>
-        <p class="lead text-muted">Visit our office in Mombasa</p>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12">
-        <div class="card border-0 shadow">
-          <div class="card-body p-0">
-            <!-- Simple map placeholder -->
-            <div style="height: 400px; background: #e9ecef; display: flex; align-items: center; justify-content: center;">
-              <div class="text-center">
-                <i class="fas fa-map-marked-alt fa-4x text-muted mb-3"></i>
-                <h4 class="text-muted">Mombasa CBD Location</h4>
-                <p class="text-muted">Near Nyali Cinemax, Mombasa</p>
-                <a href="https://maps.google.com/?q=Mombasa+CBD+Kenya" target="_blank" class="btn btn-primary">
-                  <i class="fas fa-directions me-2"></i>Get Directions
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- STICKY WHATSAPP BUTTON -->
-<a href="https://wa.me/254799692055" target="_blank" class="whatsapp-float">
-  <i class="fab fa-whatsapp"></i>
-  <span>Need Help?</span>
-</a>
-
-<!-- NAVBAR STYLES (Same as about.php) -->
-<style>
-/* Copy all the CSS styles from about.php here */
+/* Contact Page Styles */
+.contact-icon { flex-shrink:0; }
+.social-icon.facebook { background: #1877F2; color:white; }
+.social-icon.twitter { background: #1DA1F2; color:white; }
+.social-icon.instagram { background: linear-gradient(45deg,#405DE6,#5851DB,#833AB4,#C13584,#E1306C,#FD1D1D); color:white; }
+.social-icon.whatsapp { background:#25D366; color:white; }
+.social-icon:hover { transform: translateY(-3px); transition: 0.3s; }
+.contact-info-item:hover .contact-icon { transform: scale(1.1); transition: 0.3s; }
+.form-floating>label { padding-left:2.5rem; }
+.form-floating>.form-control { padding-left:2.5rem; }
+.form-floating>.form-control:focus~label { color:#667eea; }
+.accordion-button:not(.collapsed) { background-color: rgba(102,126,234,0.1); color:#667eea; box-shadow:none; }
 </style>
+</head>
+<body>
 
-<script>
-document.getElementById('contactForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  alert('Thank you for your message! We will get back to you soon.');
-  this.reset();
-});
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+<div class="container">
+    <a class="navbar-brand" href="<?php echo base_url('index.php'); ?>">Speedy Wheels</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="<?php echo base_url('index.php'); ?>">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo base_url('src/modules/vehicles/index.php'); ?>">Vehicles</a></li>
+            <li class="nav-item"><a class="nav-link active" href="<?php echo base_url('contact.php'); ?>">Contact</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo base_url('src/modules/bookings/create_booking.php'); ?>">Book Now</a></li>
+        </ul>
+    </div>
+</div>
+</nav>
 
-// Copy the JavaScript from about.php here
-</script>
+<!-- HERO -->
+<div class="contact-hero text-center">
+    <div>
+        <h1>Get in Touch</h1>
+        <p>We're here to help with your car rental needs</p>
+    </div>
+</div>
 
-<?php include __DIR__ . '/src/includes/footer.php'; ?>
+<!-- MAIN CONTENT -->
+<div class="container py-5">
+<div class="row g-5">
+
+<!-- Left: Contact Form -->
+<div class="col-lg-7">
+<div class="card shadow-lg border-0">
+<div class="card-body p-5">
+<h2 class="mb-4 text-primary"><i class="fas fa-paper-plane me-2"></i>Send Us a Message</h2>
+
+<?php if($success): ?>
+<div class="alert alert-success alert-dismissible fade show">
+    <i class="fas fa-check-circle me-2"></i>Thank you, <?php echo htmlspecialchars($name); ?>! Your message has been received.
+    <?php if($phone): ?> We'll contact you at <?php echo htmlspecialchars($phone); ?><?php endif; ?>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<?php elseif($error): ?>
+<div class="alert alert-danger alert-dismissible fade show">
+    <i class="fas fa-exclamation-circle me-2"></i><?php echo $error; ?>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<?php endif; ?>
+
+<form method="POST">
+<div class="row">
+<div class="col-md-6 mb-4">
+<div class="form-floating">
+<input type="text" class="form-control" name="name" placeholder="Your Name" required value="<?php echo htmlspecialchars($_POST['name'] ?? ''); ?>">
+<label><i class="fas fa-user me-2"></i>Full Name</label>
+</div>
+</div>
+<div class="col-md-6 mb-4">
+<div class="form-floating">
+<input type="email" class="form-control" name="email" placeholder="name@example.com" required value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
+<label><i class="fas fa-envelope me-2"></i>Email Address</label>
+</div>
+</div>
+</div>
+<div class="mb-4">
+<div class="form-floating">
+<input type="text" class="form-control" name="subject" placeholder="Subject" required value="<?php echo htmlspecialchars($_POST['subject'] ?? ''); ?>">
+<label><i class="fas fa-tag me-2"></i>Subject</label>
+</div>
+</div>
+<div class="mb-4">
+<div class="form-floating">
+<textarea class="form-control" name="message" placeholder="Your Message" style="height:150px" required><?php echo htmlspecialchars($_POST['message'] ?? ''); ?></textarea>
+<label><i class="fas fa-comment-dots me-2"></i>Your Message</label>
+</div>
+</div>
+<div class="mb-4">
+<div class="form-floating">
+<input type="tel" class="form-control" name="phone" placeholder="Phone Number" value="<?php echo htmlspecialchars($_POST['phone'] ?? ''); ?>">
+<label><i class="fas fa-phone me-2"></i>Phone Number (Optional)</label>
+</div>
+</div>
+<div class="d-grid">
+<button type="submit" class="btn btn-primary btn-lg py-3"><i class="fas fa-paper-plane me-2"></i>Send Message</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+
+<!-- Right: Contact Info & Map -->
+<div class="col-lg-5">
+
+<!-- Contact Info -->
+<div class="card shadow-sm border-0 mb-4">
+<div class="card-body p-4">
+<h3 class="text-primary mb-4"><i class="fas fa-info-circle me-2"></i>Contact Information</h3>
+<div class="contact-info-item d-flex mb-4">
+<div class="contact-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width:50px;height:50px;"><i class="fas fa-map-marker-alt"></i></div>
+<div>
+<h5 class="fw-bold">Our Location</h5>
+<p class="mb-0 text-muted">Mombasa Road, Next to Shell Station<br>Mombasa, Kenya</p>
+</div>
+</div>
+<div class="contact-info-item d-flex mb-4">
+<div class="contact-icon bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width:50px;height:50px;"><i class="fas fa-phone"></i></div>
+<div>
+<h5 class="fw-bold">Call Us</h5>
+<p class="mb-0">
+<a href="tel:+254799692055" class="text-decoration-none">+254 799 692 055</a><br>
+<a href="tel:+254750515354" class="text-decoration-none">+254 750 515 354</a>
+</p>
+</div>
+</div>
+<div class="contact-info-item d-flex mb-4">
+<div class="contact-icon bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width:50px;height:50px;"><i class="fas fa-envelope"></i></div>
+<div>
+<h5 class="fw-bold">Email Us</h5>
+<p class="mb-0">
+<a href="mailto:lewinskyvictoria45@gmail.com" class="text-decoration-none">lewinskyvictoria45@gmail.com</a><br>
+<a href="mailto:vickielewinsky@gmail.com" class="text-decoration-none">vickielewinsky@gmail.com</a>
+</p>
+</div>
+</div>
+<div class="contact-info-item d-flex">
+<div class="contact-icon bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width:50px;height:50px;"><i class="fas fa-clock"></i></div>
+<div>
+<h5 class="fw-bold">Business Hours</h5>
+<p class="mb-0 text-muted"><strong>Mon - Fri:</strong> 8:00 AM - 8:00 PM<br><strong>Sat - Sun:</strong> 9:00 AM - 6:00 PM<br><strong>Emergency:</strong> 24/7 Available</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Social Media -->
+<div class="card shadow-sm border-0 mb-4">
+<div class="card-body p-4">
+<h3 class="text-primary mb-4"><i class="fas fa-share-alt me-2"></i>Follow Us</h3>
+<div class="d-flex justify-content-center gap-3">
+<a href="#" class="social-icon facebook d-flex align-items-center justify-content-center rounded-circle text-decoration-none" style="width:50px;height:50px;"><i class="fab fa-facebook-f"></i></a>
+<a href="#" class="social-icon twitter d-flex align-items-center justify-content-center rounded-circle text-decoration-none" style="width:50px;height:50px;"><i class="fab fa-twitter"></i></a>
+<a href="#" class="social-icon instagram d-flex align-items-center justify-content-center rounded-circle text-decoration-none" style="width:50px;height:50px;"><i class="fab fa-instagram"></i></a>
+<a href="#" class="social-icon whatsapp d-flex align-items-center justify-content-center rounded-circle text-decoration-none" style="width:50px;height:50px;"><i class="fab fa-whatsapp"></i></a>
+</div>
+</div>
+</div>
+
+<!-- Quick Actions -->
+<div class="d-grid gap-2">
+<a href="<?php echo base_url('index.php'); ?>" class="btn btn-outline-primary"><i class="fas fa-home me-2"></i>Back to Home</a>
+<a href="<?php echo base_url('src/modules/bookings/create_booking.php'); ?>" class="btn btn-success"><i class="fas fa-calendar-plus me-2"></i>Book a Car Now</a>
+</div>
+
+</div>
+</div>
+
+<!-- FAQ Section -->
+<div class="row mt-5">
+<div class="col-12">
+<div class="card shadow border-0">
+<div class="card-body p-5">
+<h2 class="text-center mb-4 text-primary"><i class="fas fa-question-circle me-2"></i>Frequently Asked Questions</h2>
+<div class="accordion" id="faqAccordion">
+<div class="accordion-item mb-3 border-0">
+<h3 class="accordion-header">
+<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+<i class="fas fa-car me-2 text-primary"></i>What documents do I need to rent a car?
+</button>
+</h3>
+<div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+<div class="accordion-body">You'll need a valid driver's license, national ID or passport, and a credit/debit card for the security deposit.</div>
+</div>
+</div>
+<div class="accordion-item mb-3 border-0">
+<h3 class="accordion-header">
+<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+<i class="fas fa-clock me-2 text-primary"></i>What are your operating hours?
+</button>
+</h3>
+<div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+<div class="accordion-body">We're open Monday to Friday from 8:00 AM to 8:00 PM, and weekends from 9:00 AM to 6:00 PM. Emergency assistance is available 24/7.</div>
+</div>
+</div>
+<div class="accordion-item border-0">
+<h3 class="accordion-header">
+<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+<i class="fas fa-money-bill-wave me-2 text-primary"></i>What payment methods do you accept?
+</button>
+</h3>
+<div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+<div class="accordion-body">We accept MPESA, credit/debit cards (Visa, MasterCard), and cash payments at our office.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

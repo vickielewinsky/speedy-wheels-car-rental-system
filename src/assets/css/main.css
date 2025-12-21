@@ -6,6 +6,7 @@
 @import url('components/tables.css');
 @import url('components/cards.css');
 @import url('components/modals.css');
+@import url('components/auth.css');
 
 /* Base styles */
 * {
@@ -35,9 +36,19 @@ body {
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
+/* Login page specific styles */
+body.login-page {
+    padding-top: 40px !important;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%) !important;
+}
+
 /* Mobile body padding adjustment */
 @media (max-width: 768px) {
     body {
         padding-top: 100px;
+    }
+    
+    body.login-page {
+        padding-top: 20px !important;
     }
 }

@@ -353,7 +353,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
 <?php endif; ?>
 
 <!-- STICKY WHATSAPP BUTTON -->
-<a href="https://wa.me/254799692055" 
+<a href="https://wa.me/254750515354" 
    target="_blank" 
    class="whatsapp-float"
    style="position: fixed; 
