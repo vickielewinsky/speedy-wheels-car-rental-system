@@ -118,3 +118,9 @@ tests/
 check_database_tables.php
 quick_email_test.php
 test_*.php
+
+# Development/test files
+check_database_tables.php
+quick_email_test.php
+test_*.php
+clean_ai_artifacts.sh
