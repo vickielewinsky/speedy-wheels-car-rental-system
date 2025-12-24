@@ -1,74 +1,503 @@
-/* Button Component Styles */
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 12px 24px;
+/* ============================================
+   ENHANCED BUTTON COMPONENT STYLES
+   Professional button styles for Speedy Wheels
+============================================ */
+
+/* Base Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 28px;
     border: none;
-    border-radius: 6px;
-    cursor: pointer;
+    border-radius: 12px;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
     font-size: 16px;
-    transition: all 0.3s ease;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    letter-spacing: 0.3px;
+    min-height: 52px;
+}
+
+/* Button Sizes */
+.btn-sm {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-height: 44px;
+    border-radius: 10px;
+}
+
+.btn-lg {
+    padding: 18px 36px;
+    font-size: 18px;
+    min-height: 60px;
+    border-radius: 14px;
+}
+
+.btn-xl {
+    padding: 22px 44px;
+    font-size: 20px;
+    font-weight: 700;
+    min-height: 68px;
+    border-radius: 16px;
+}
+
+.btn-full {
+    width: 100%;
+}
+
+/* Primary Button - Enhanced */
+.btn-primary {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.25);
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.35);
+    color: white;
 }
 
+.btn-primary:hover::before {
+    opacity: 1;
+}
+
+.btn-primary:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+}
+
+.btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15), 0 6px 20px rgba(79, 70, 229, 0.25);
+}
+
+.btn-primary i {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.btn-primary:hover i {
+    transform: translateX(3px);
+}
+
+/* Secondary Button - Enhanced */
 .btn-secondary {
-    background: #6c757d;
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
     color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.2);
 }
 
+.btn-secondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(107, 114, 128, 0.3);
+    color: white;
+}
+
+.btn-secondary:hover::before {
+    opacity: 1;
+}
+
+/* Danger Button - Enhanced */
 .btn-danger {
-    background: #dc3545;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
     color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.2);
 }
 
+.btn-danger::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+    color: white;
+}
+
+.btn-danger:hover::before {
+    opacity: 1;
+}
+
+/* Success Button - Enhanced */
 .btn-success {
-    background: #28a745;
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
     color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(22, 163, 74, 0.2);
 }
 
+.btn-success::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(22, 163, 74, 0.3);
+    color: white;
+}
+
+.btn-success:hover::before {
+    opacity: 1;
+}
+
+/* Outline Light Button - Enhanced */
 .btn-outline-light {
-    border: 1px solid #f8f9fa;
-    color: #f8f9fa;
     background: transparent;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    color: #f8f9fa;
+    border: 2px solid #f8f9fa;
+    padding: 12px 26px;
 }
 
 .btn-outline-light:hover {
     background: #f8f9fa;
-    color: #343a40;
+    color: #1f2937;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(248, 249, 250, 0.3);
 }
 
+.btn-outline-light:focus {
+    box-shadow: 0 0 0 3px rgba(248, 249, 250, 0.25);
+}
+
+/* Book Now Button - Enhanced */
 .btn-book-now {
-    background: #28a745;
+    background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
     color: white;
-    padding: 15px 30px;
+    padding: 18px 40px;
     font-size: 18px;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+    font-weight: 700;
+    border-radius: 14px;
+    box-shadow: 0 8px 25px rgba(22, 163, 74, 0.3);
+    letter-spacing: 0.5px;
+}
+
+.btn-book-now::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
 }
 
 .btn-book-now:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(22, 163, 74, 0.4);
+    color: white;
+}
+
+.btn-book-now:hover::before {
+    opacity: 1;
+}
+
+.btn-book-now i {
+    font-size: 20px;
+    transition: transform 0.3s ease;
+}
+
+.btn-book-now:hover i {
+    transform: translateX(5px);
+}
+
+/* Social Buttons - Enhanced */
+.btn-facebook {
+    background: white;
+    color: #1877f2;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.btn-facebook::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #1877f2;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.btn-facebook:hover {
+    color: white;
+    border-color: #1877f2;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    box-shadow: 0 8px 25px rgba(24, 119, 242, 0.2);
+}
+
+.btn-facebook:hover::before {
+    opacity: 1;
+}
+
+.btn-google {
+    background: white;
+    color: #DB4437;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.btn-google::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #DB4437;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.btn-google:hover {
+    color: white;
+    border-color: #DB4437;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(219, 68, 55, 0.2);
+}
+
+.btn-google:hover::before {
+    opacity: 1;
+}
+
+/* Link Button Style */
+.btn-link {
+    background: transparent;
+    color: #4f46e5;
+    padding: 0;
+    min-height: auto;
+    text-decoration: none;
+    font-weight: 600;
+    position: relative;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.btn-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.btn-link:hover {
+    color: #7c3aed;
+    background-color: rgba(79, 70, 229, 0.05);
+    text-decoration: none;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-link:hover::after {
+    width: calc(100% - 16px);
+}
+
+/* Disabled State */
+.btn:disabled,
+.btn.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Loading State */
+.btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Icon Animations */
+.btn i {
+    transition: transform 0.3s ease;
+}
+
+.btn:hover i {
+    transform: translateX(3px);
+}
+
+.btn-social:hover i {
+    transform: scale(1.1);
+}
+
+/* Focus States for Accessibility */
+.btn:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.5);
+    outline-offset: 2px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .btn {
+        padding: 12px 24px;
+        font-size: 15px;
+        min-height: 48px;
+    }
+    
+    .btn-lg {
+        padding: 16px 32px;
+        font-size: 17px;
+        min-height: 56px;
+    }
+    
+    .btn-xl {
+        padding: 18px 36px;
+        font-size: 18px;
+        min-height: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn {
+        padding: 11px 20px;
+        font-size: 14px;
+        min-height: 44px;
+    }
+    
+    .btn-full {
+        width: 100%;
+    }
+    
+    .btn-book-now {
+        padding: 16px 30px;
+        font-size: 16px;
+    }
+}
+
+/* Special Login Form Button (Backward Compatibility) */
+.login-button {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 18px 24px;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.5px;
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.25);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.login-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.login-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.35);
+}
+
+.login-button:hover::before {
+    opacity: 1;
+}
+
+.login-button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+}
+
+.login-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15), 0 6px 20px rgba(79, 70, 229, 0.25);
+}
+
+.login-button i {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.login-button:hover i {
+    transform: translateX(3px);
 }

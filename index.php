@@ -8,14 +8,29 @@ require_once __DIR__ . '/src/config/config.php';
 require_once __DIR__ . '/src/config/database.php';
 $page_title = "Home - Speedy Wheels";
 
+// Ensure base_url function exists
+if (!function_exists('base_url')) {
+    function base_url($path = '') {
+        // Adjust this based on your actual base URL structure
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'];
+        $project_folder = ''; // Add your project folder name if in subdirectory
+        
+        $base = $protocol . '://' . $host . '/' . $project_folder;
+        return rtrim($base, '/') . '/' . ltrim($path, '/');
+    }
+}
+
 include __DIR__ . '/src/includes/header.php';
 
 try {
-    $stmt = $pdo->prepare("SELECT vehicle_id, plate_no, model, make, year, color, daily_rate, status FROM vehicles WHERE status = 'available' ORDER BY daily_rate ASC");
+    // CHANGED: Removed WHERE clause to show ALL vehicles
+    $stmt = $pdo->prepare("SELECT vehicle_id, plate_no, model, make, year, color, daily_rate, status FROM vehicles ORDER BY daily_rate ASC");
     $stmt->execute();
     $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $vehicles = [];
+    error_log("Database error: " . $e->getMessage());
 }
 
 // Clean vehicle name (remove duplicate make)
@@ -24,6 +39,139 @@ function getCleanVehicleName($make, $model) {
         return $model;
     }
     return $make . ' ' . $model;
+}
+
+// Function to get vehicle image - UPDATED WITH BETTER ERROR HANDLING
+function getVehicleImage($make, $model) {
+    // Clean up the make and model for matching
+    $make = trim($make);
+    $model = trim($model);
+    
+    // Check for common variations
+    $image_map = [
+        'Toyota' => [
+            'RAV4' => 'toyota-rav4.jpg',
+            'Axio' => 'toyota-axio.jpg',
+            'Corolla' => 'toyota-corolla.jpg',
+            'Camry' => 'toyota-camry.jpg',
+            'Land Cruiser' => 'toyota-landcruiser.jpg',
+            'Hilux' => 'toyota-hilux.jpg',
+            'Prado' => 'toyota-prado.jpg'
+        ],
+        'Honda' => [
+            'CR-V' => 'honda-cr-v.jpg',
+            'Fit' => 'honda-fit.jpg',
+            'Civic' => 'honda-civic.jpg',
+            'Accord' => 'honda-accord.jpg'
+        ],
+        'Nissan' => [
+            'X-Trail' => 'nissan-x-trail.jpg',
+            'Note' => 'nissan-note.jpg',
+            'March' => 'nissan-march.jpg',
+            'Sunny' => 'nissan-sunny.jpg'
+        ],
+        'Mazda' => [
+            'CX-5' => 'mazda-cx-5.jpg',
+            'Demio' => 'mazda-demio.jpg',
+            'Axela' => 'mazda-axela.jpg'
+        ],
+        'Subaru' => [
+            'Forester' => 'subaru-forester.jpg',
+            'Impreza' => 'subaru-impreza.jpg',
+            'Outback' => 'subaru-outback.jpg'
+        ],
+        'Mitsubishi' => [
+            'Outlander' => 'mitsubishi-outlander.jpg',
+            'Pajero' => 'mitsubishi-pajero.jpg',
+            'Lancer' => 'mitsubishi-lancer.jpg'
+        ],
+        'Volkswagen' => [
+            'Tiguan' => 'volkswagen-tiguan.jpg',
+            'Golf' => 'volkswagen-golf.jpg',
+            'Passat' => 'volkswagen-passat.jpg'
+        ],
+        'Ford' => [
+            'Escape' => 'ford-escape.jpg',
+            'Ranger' => 'ford-ranger.jpg',
+            'Focus' => 'ford-focus.jpg'
+        ],
+        'Hyundai' => [
+            'Tucson' => 'hyundai-tucson.jpg',
+            'Elantra' => 'hyundai-elantra.jpg',
+            'Accent' => 'hyundai-accent.jpg'
+        ],
+        'Kia' => [
+            'Sportage' => 'kia-sportage.jpg',
+            'Rio' => 'kia-rio.jpg',
+            'Sorento' => 'kia-sorento.jpg'
+        ],
+        'Mercedes-Benz' => [
+            'GLC' => 'mercedes-glc.jpg',
+            'C-Class' => 'mercedes-c-class.jpg',
+            'E-Class' => 'mercedes-e-class.jpg'
+        ],
+        'BMW' => [
+            'X3' => 'bmw-x3.jpg',
+            'X5' => 'bmw-x5.jpg',
+            '3 Series' => 'bmw-3-series.jpg'
+        ],
+        'Lexus' => [
+            'RX 350' => 'lexus-rx350.jpg',
+            'IS' => 'lexus-is.jpg',
+            'ES' => 'lexus-es.jpg'
+        ],
+        'Isuzu' => [
+            'D-Max' => 'isuzu-dmax.jpg',
+            'DMAX' => 'isuzu-dmax.jpg'
+        ],
+        'Chevrolet' => [
+            'Equinox' => 'chevrolet-equinox.jpg',
+            'Cruze' => 'chevrolet-cruze.jpg',
+            'Spark' => 'chevrolet-spark.jpg'
+        ],
+        'Audi' => [
+            'Q5' => 'audi-q5.jpg',
+            'A4' => 'audi-a4.jpg',
+            'A6' => 'audi-a6.jpg'
+        ],
+        'Land Rover' => [
+            'Discovery' => 'landrover-discovery.jpg',
+            'Range Rover' => 'landrover-range-rover.jpg'
+        ]
+    ];
+    
+    // Try exact match first
+    if (isset($image_map[$make]) && isset($image_map[$make][$model])) {
+        return $image_map[$make][$model];
+    }
+    
+    // Try case-insensitive match
+    $make_lower = strtolower($make);
+    $model_lower = strtolower($model);
+    
+    foreach ($image_map as $make_key => $models) {
+        if (strtolower($make_key) === $make_lower) {
+            foreach ($models as $model_key => $filename) {
+                if (strtolower($model_key) === $model_lower) {
+                    return $filename;
+                }
+            }
+        }
+    }
+    
+    // Try partial match
+    foreach ($image_map as $make_key => $models) {
+        if (stripos($make, $make_key) !== false || stripos($make_key, $make) !== false) {
+            foreach ($models as $model_key => $filename) {
+                if (stripos($model, $model_key) !== false || stripos($model_key, $model) !== false) {
+                    return $filename;
+                }
+            }
+        }
+    }
+    
+    // Default image
+    return 'default-vehicle.jpg';
 }
 
 // Check user login (session already started in header.php)
@@ -38,11 +186,11 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
     <a class="navbar-brand fw-bold brand-logo" href="<?= base_url('index.php') ?>">
       <i class="fas fa-car me-2"></i>Speedy Wheels
     </a>
-
+    
     <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
-
+    
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         <!-- Main Navigation Links -->
@@ -66,7 +214,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
             <i class="fas fa-phone me-1"></i>Contact
           </a>
         </li>
-
+        
         <!-- ADMIN LINKS - Only show for admin users -->
         <?php if ($is_admin): ?>
           <li class="nav-item dropdown">
@@ -83,7 +231,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
               <li><a class="dropdown-item" href="<?= base_url('src/modules/customers/index.php') ?>">
                 <i class="fas fa-users text-info me-2"></i>Manage Customers
               </a></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/payments/payment.php') ?>">
+              <li><a class="dropdown-item" href="<?= base_url('payment.php') ?>">
                 <i class="fas fa-file-invoice-dollar text-warning me-2"></i>Payment History
               </a></li>
               <li><a class="dropdown-item" href="<?= base_url('src/modules/reports/index.php') ?>">
@@ -96,7 +244,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
             </ul>
           </li>
         <?php endif; ?>
-
+        
         <!-- USER AUTH LINKS -->
         <?php if (!$is_logged_in): ?>
           <li class="nav-item ms-2">
@@ -195,61 +343,76 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
       <?php if (!empty($vehicles)): ?>
         <?php foreach ($vehicles as $vehicle): ?>
           <?php
-          $model_raw = trim($vehicle['model']);      
-          $model_parts = explode(' ', $model_raw);
-          $model = strtolower(end($model_parts));
-          $color = strtolower(trim($vehicle['color']));
           $vehicle_name = getCleanVehicleName($vehicle['make'], $vehicle['model']);
           $monthly_rate = $vehicle['daily_rate'] * 30;
+          $image_filename = getVehicleImage($vehicle['make'], $vehicle['model']);
+          $image_path = 'src/assets/images/vehicles/' . $image_filename;
+          $full_image_path = base_url($image_path);
+          
+          // Debug output (remove in production)
+          // echo "<!-- Debug: " . $vehicle['make'] . " " . $vehicle['model'] . " -> " . $image_filename . " -->";
           ?>
-
+          
           <div class="col-lg-6 col-xl-4 mb-4">
             <div class="card h-100 shadow border-0">
-              <div style="height:250px; overflow:hidden;">
-                <?php if ($model == 'fit'): ?>
-                  <img src="<?= base_url('src/assets/images/vehicles/honda-fit.jpg') ?>" class="w-100 h-100" style="object-fit:cover;">
-                <?php elseif ($model == 'axio'): ?>
-                  <img src="<?= base_url('src/assets/images/vehicles/toyota-axio.jpg') ?>" class="w-100 h-100" style="object-fit:cover;">
-                <?php elseif ($model == 'cr-v'): ?>
-                  <img src="<?= base_url('src/assets/images/vehicles/honda-cr-v.jpg') ?>" class="w-100 h-100" style="object-fit:cover;">
-                <?php elseif ($model == 'cx-5'): ?>
-                  <img src="<?= base_url('src/assets/images/vehicles/mazda-cx-5.jpg') ?>" class="w-100 h-100" style="object-fit:cover;">
-                <?php elseif ($model == 'rav4'): ?>
-                  <img src="<?= base_url('src/assets/images/vehicles/toyota-rav4.jpg') ?>" class="w-100 h-100" style="object-fit:cover;">
-                <?php elseif ($model == 'forester'): ?>
-                  <img src="<?= base_url('src/assets/images/vehicles/subaru-forester.jpg') ?>" class="w-100 h-100" style="object-fit:cover;">
-                <?php elseif ($model == 'x-trail' && $color == 'black'): ?>
-                  <img src="<?= base_url('src/assets/images/vehicles/nissan-x-trail-black.jpg') ?>" class="w-100 h-100" style="object-fit:cover;">
-                <?php elseif ($model == 'x-trail'): ?>
-                  <img src="<?= base_url('src/assets/images/vehicles/nissan-x-trail.jpg') ?>" class="w-100 h-100" style="object-fit:cover;">
-                <?php else: ?>
-                  <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary text-white">
-                    <i class="fas fa-car fa-3x"></i>
-                  </div>
-                <?php endif; ?>
+              <div style="height:250px; overflow:hidden; position:relative;">
+                <!-- Add onerror handler to show default image if file doesn't exist -->
+                <img src="<?= $full_image_path ?>" 
+                     class="w-100 h-100 vehicle-image" 
+                     style="object-fit:cover;"
+                     alt="<?= htmlspecialchars($vehicle_name) ?>"
+                     onerror="this.onerror=null; this.src='<?= base_url('src/assets/images/vehicles/default-vehicle.jpg') ?>';"
+                     data-make="<?= htmlspecialchars($vehicle['make']) ?>"
+                     data-model="<?= htmlspecialchars($vehicle['model']) ?>"
+                     data-filename="<?= htmlspecialchars($image_filename) ?>">
+                
+                <!-- Status Badge -->
+                <div style="position: absolute; top: 10px; right: 10px;">
+                  <?php if ($vehicle['status'] == 'available'): ?>
+                    <span class="badge bg-success">Available</span>
+                  <?php elseif ($vehicle['status'] == 'booked'): ?>
+                    <span class="badge bg-warning text-dark">Booked</span>
+                  <?php elseif ($vehicle['status'] == 'maintenance'): ?>
+                    <span class="badge bg-danger">Maintenance</span>
+                  <?php else: ?>
+                    <span class="badge bg-secondary"><?= ucfirst($vehicle['status']) ?></span>
+                  <?php endif; ?>
+                </div>
               </div>
-
+              
               <div class="card-body p-3">
-                <h5 class="card-title mb-2"><?= $vehicle_name ?></h5>
+                <h5 class="card-title mb-2"><?= htmlspecialchars($vehicle_name) ?></h5>
+                
                 <div class="mb-3">
                   <div class="d-flex justify-content-between mb-1">
-                    <small>Daily Rate:</small>
+                    <small class="text-muted">Daily Rate:</small>
                     <span class="text-primary fw-bold">Ksh <?= number_format($vehicle['daily_rate'], 0) ?></span>
                   </div>
                   <div class="d-flex justify-content-between">
-                    <small>Monthly Rate:</small>
+                    <small class="text-muted">Monthly Rate:</small>
                     <span class="text-success fw-bold">Ksh <?= number_format($monthly_rate, 0) ?></span>
                   </div>
                 </div>
+                
                 <div class="mb-2">
                   <small class="text-muted">
-                    <?= $vehicle['year'] ?>  <?= $vehicle['color'] ?>  <?= $vehicle['plate_no'] ?>
+                    <?= $vehicle['year'] ?> • <?= $vehicle['color'] ?> • <?= $vehicle['plate_no'] ?>
                   </small>
                 </div>
+                
                 <div class="d-flex justify-content-between align-items-center">
-                  <a href="<?= base_url('src/modules/bookings/create_booking.php?vehicle_id=' . $vehicle['vehicle_id']) ?>" class="btn btn-primary btn-sm">
-                    Book Now
-                  </a>
+                  <?php if ($vehicle['status'] == 'available'): ?>
+                    <a href="<?= base_url('src/modules/bookings/create_booking.php?vehicle_id=' . $vehicle['vehicle_id']) ?>" class="btn btn-primary btn-sm">
+                      Book Now
+                    </a>
+                  <?php else: ?>
+                    <button class="btn btn-secondary btn-sm" disabled>
+                      Unavailable
+                    </button>
+                  <?php endif; ?>
+                  <small class="text-muted">
+                    Image: <?= $image_filename ?>
+                  </small>
                 </div>
               </div>
             </div>
@@ -343,7 +506,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
             <i class="fas fa-file-invoice-dollar fa-3x text-warning mb-3"></i>
             <h5>Payment History</h5>
             <p class="text-muted small">View payment transactions</p>
-            <a href="<?= base_url('src/modules/payments/payment.php') ?>" class="btn btn-warning btn-sm">View Payments</a>
+            <a href="<?= base_url('payment.php') ?>" class="btn btn-warning btn-sm">View Payments</a>
           </div>
         </div>
       </div>
@@ -353,7 +516,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
 <?php endif; ?>
 
 <!-- STICKY WHATSAPP BUTTON -->
-<a href="https://wa.me/254750515354" 
+<a href="https://wa.me/254799692055" 
    target="_blank" 
    class="whatsapp-float"
    style="position: fixed; 
@@ -548,6 +711,17 @@ html {
   margin: 0 auto 20px;
 }
 
+/* Vehicle image fallback */
+.vehicle-image {
+  background-color: #f8f9fa;
+  background-image: linear-gradient(45deg, #e9ecef 25%, transparent 25%), 
+                    linear-gradient(-45deg, #e9ecef 25%, transparent 25%), 
+                    linear-gradient(45deg, transparent 75%, #e9ecef 75%), 
+                    linear-gradient(-45deg, transparent 75%, #e9ecef 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
 /* WhatsApp button */
 .whatsapp-float:hover {
   background: #128C7E;
@@ -582,6 +756,26 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       navbar.classList.remove('scrolled');
     }
+  });
+  
+  // Debug image loading
+  document.querySelectorAll('.vehicle-image').forEach(img => {
+    img.addEventListener('error', function() {
+      console.log('Image failed to load:', {
+        make: this.dataset.make,
+        model: this.dataset.model,
+        filename: this.dataset.filename,
+        src: this.src
+      });
+    });
+    
+    img.addEventListener('load', function() {
+      console.log('Image loaded successfully:', {
+        make: this.dataset.make,
+        model: this.dataset.model,
+        filename: this.dataset.filename
+      });
+    });
   });
 });
 </script>

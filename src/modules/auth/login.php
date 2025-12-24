@@ -1,9 +1,6 @@
 <?php
 // src/modules/auth/login.php
 
-// Define this constant BEFORE including any files
-define('LOGIN_PAGE', true);
-
 // Start session FIRST
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -13,24 +10,25 @@ if (session_status() === PHP_SESSION_NONE) {
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-// Debug session
-error_log("Login page accessed. Session ID: " . session_id());
-error_log("Session user_id: " . (isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'NOT SET'));
-
 require_once "../../config/database.php";
 require_once "../../includes/auth.php";
 require_once "Auth.php";
 
-// Redirect if already logged in - but only if not on login page
-if (isAuthenticated() && !defined('LOGIN_PAGE')) {
+// Redirect if already logged in
+if (isAuthenticated()) {
     header("Location: " . base_url('index.php'));
     exit;
 }
 
-// Handle form submission BEFORE including header
+$page_title = "Sign in to Speedy Wheels";
+ob_start(); // Start output buffering to catch any errors
+require_once "../../includes/header.php";
+ob_end_clean(); // Discard any output
+
 $error = "";
+
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Check if both fields exist and are not empty
     if (!isset($_POST['username']) || !isset($_POST['password'])) {
         $error = "Please enter both username and password.";
     } else {
@@ -46,52 +44,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($result['success']) {
                     $_SESSION['success_message'] = "Login successful! Welcome back, " . htmlspecialchars($username) . "!";
-
-                    // Check if there's a redirect URL stored
-                    $redirect_url = $_SESSION['redirect_url'] ?? 'index.php';
-                    if (isset($_SESSION['redirect_url'])) {
-                        unset($_SESSION['redirect_url']);
-                    }
-
-                    header("Location: " . base_url($redirect_url));
+                    header("Location: " . base_url('index.php'));
                     exit;
                 } else {
-                    // Generic error message for security
                     $error = "Invalid username or password.";
                 }
             } catch (Exception $e) {
-                // Log the error but show generic message to user
                 error_log("Login error: " . $e->getMessage());
                 $error = "An error occurred during login. Please try again.";
             }
         }
-    }
-}
-
-$page_title = "Sign in to Speedy Wheels";
-
-// Get background image - try multiple paths
-$image_url = '';
-$possible_paths = [
-    'src/assets/images/hero-car.png',
-    'assets/images/hero-car.png',
-    'images/hero-car.png',
-    'hero-car.png'
-];
-
-foreach ($possible_paths as $path) {
-    $full_path = $_SERVER['DOCUMENT_ROOT'] . '/speedy-wheels-car-rental-system/' . ltrim($path, '/');
-    if (file_exists($full_path)) {
-        $image_url = base_url($path);
-        break;
-    }
-}
-
-// If still not found, check relative to this file
-if (empty($image_url)) {
-    $local_path = __DIR__ . '/../../../src/assets/images/hero-car.png';
-    if (file_exists($local_path)) {
-        $image_url = base_url('src/assets/images/hero-car.png');
     }
 }
 ?>
@@ -100,31 +62,51 @@ if (empty($image_url)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title); ?> - Speedy Wheels</title>
-
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <title>Sign in to Speedy Wheels</title>
+    
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
+    
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Your Main CSS -->
-    <link href="<?php echo base_url('src/assets/css/main.css'); ?>" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-
-        body {
+        /* ============================================
+           EXACT MYHIRE.CO.KE LOGIN FORM REPLICA
+           Clean, modern, professional design
+        ============================================ */
+        
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border: #d1d5db;
+            --border-focus: #2563eb;
+            --background: #ffffff;
+            --radius: 8px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        * {
             margin: 0;
             padding: 0;
-            min-height: 100vh;
-            font-family: 'Poppins', 'Segoe UI', sans-serif;
-            background-color: #f8f9fa;
-            padding-top: 80px; /* For navbar */
+            box-sizing: border-box;
         }
-
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+        
+        /* Background container */
         .background-container {
             position: fixed;
             top: 0;
@@ -134,8 +116,33 @@ if (empty($image_url)) {
             z-index: -3;
             overflow: hidden;
         }
-
-        <?php if (!empty($image_url)): ?>
+        
+        <?php 
+        // Get background image
+        $image_url = '';
+        $possible_paths = [
+            'src/assets/images/hero-car.png',
+            'assets/images/hero-car.png',
+            'images/hero-car.png',
+            'hero-car.png'
+        ];
+        
+        foreach ($possible_paths as $path) {
+            $full_path = $_SERVER['DOCUMENT_ROOT'] . '/speedy-wheels-car-rental-system/' . ltrim($path, '/');
+            if (file_exists($full_path)) {
+                $image_url = base_url($path);
+                break;
+            }
+        }
+        
+        if (empty($image_url)) {
+            $local_path = __DIR__ . '/../../../src/assets/images/hero-car.png';
+            if (file_exists($local_path)) {
+                $image_url = base_url('src/assets/images/hero-car.png');
+            }
+        }
+        
+        if (!empty($image_url)): ?>
         .background-container::before {
             content: '';
             position: absolute;
@@ -152,7 +159,7 @@ if (empty($image_url)) {
             filter: blur(0.5px);
         }
         <?php endif; ?>
-
+        
         .background-container::after {
             content: '';
             position: absolute;
@@ -165,685 +172,351 @@ if (empty($image_url)) {
                 rgba(248, 249, 250, 0.96) 100%);
             z-index: -1;
         }
-
+        
+        /* Main Login Container */
         .login-wrapper {
-            min-height: calc(100vh - 300px);
+            width: 100%;
+            max-width: 420px;
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        /* Login Card - Exact myhire style */
+        .login-card {
+            background: var(--background);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 40px;
+            border: 1px solid var(--border);
+        }
+        
+        /* Header */
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .login-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+        
+        .login-header p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            background: var(--background);
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-control::placeholder {
+            color: #9ca3af;
+        }
+        
+        /* Remember Me */
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .remember-me input {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        
+        .remember-me label {
+            font-size: 14px;
+            color: var(--text-dark);
+            cursor: pointer;
+        }
+        
+        /* Login Button */
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            margin-bottom: 24px;
+        }
+        
+        .login-button:hover {
+            background: var(--primary-hover);
+        }
+        
+        .login-button:active {
+            transform: translateY(1px);
+        }
+        
+        /* Divider */
+        .divider {
+            text-align: center;
+            position: relative;
+            margin: 24px 0;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+        }
+        
+        .divider span {
+            background: var(--background);
+            padding: 0 16px;
+            position: relative;
+        }
+        
+        /* Social Buttons */
+        .social-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .social-button {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 40px 20px;
-            position: relative;
-            z-index: 1;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--background);
+            color: var(--text-dark);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
         }
-
-        .login-box {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
-            width: 100%;
-            max-width: 500px;
-            padding: 45px 40px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            border-top: 5px solid #667eea;
-            position: relative;
-            overflow: hidden;
-            animation: slideUp 0.6s ease-out;
+        
+        .social-button:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
         }
-
-        @keyframes slideUp {
+        
+        .social-button.facebook {
+            color: #1877f2;
+        }
+        
+        .social-button.google {
+            color: #ea4335;
+        }
+        
+        .social-button i {
+            font-size: 18px;
+        }
+        
+        /* Register Link */
+        .register-section {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            margin-top: 24px;
+        }
+        
+        .register-section p {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+        
+        .register-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.2s ease;
+        }
+        
+        .register-link:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+        
+        /* Demo Accounts */
+        .demo-accounts {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 24px;
+        }
+        
+        .demo-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .demo-title i {
+            color: var(--primary);
+        }
+        
+        .demo-account {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .demo-account:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .account-type {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+        
+        .account-details {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        .account-details strong {
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+        
+        /* Error Message */
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            color: #dc2626;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .error-message i {
+            font-size: 16px;
+        }
+        
+        /* Success Message */
+        .success-message {
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            color: #059669;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .success-message i {
+            font-size: 16px;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(40px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-
-        .alert-box {
-            border-radius: 12px;
-            border: none;
-            margin-bottom: 30px;
-            padding: 18px 20px;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        .alert-error {
-            background: linear-gradient(135deg, #fff5f5 0%, #ffeaea 100%);
-            color: #c00;
-            border-left: 5px solid #dc3545;
-        }
-
-        .alert-success {
-            background: linear-gradient(135deg, #f0fff4 0%, #e6ffe6 100%);
-            color: #0a5;
-            border-left: 5px solid #28a745;
-        }
-
-        @keyframes fadeIn {
+        
+        @keyframes slideDown {
             from {
                 opacity: 0;
+                transform: translateY(-10px);
             }
             to {
                 opacity: 1;
+                transform: translateY(0);
             }
         }
-
-
-        .form-container {
-            margin-top: 30px;
-        }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 40px;
-            position: relative;
-        }
-
-        .form-icon {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-
-        .form-icon i {
-            font-size: 28px;
-            color: white;
-        }
-
-        .form-header h2 {
-            color: #2c3e50;
-            font-weight: 700;
-            margin-bottom: 8px;
-            font-size: 24px;
-        }
-
-        .form-subtitle {
-            color: #6c757d;
-            font-size: 14px;
-            margin-bottom: 0;
-            font-weight: 400;
-        }
-
-        .form-field-group {
-            margin-bottom: 28px;
-        }
-
-        .field-label-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: #495057;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .form-label i {
-            color: #667eea;
-            font-size: 14px;
-        }
-
-        .required-indicator {
-            color: #dc3545;
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .input-with-icon {
-            position: relative;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-            font-size: 16px;
-            z-index: 2;
-            transition: color 0.3s ease;
-        }
-
-        .password-field .input-icon {
-            left: 18px;
-        }
-
-        .modern-input {
-            padding: 16px 20px 16px 50px;
-            border: 2px solid #e1e8ed;
-            border-radius: 12px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            background: white;
-            font-family: 'Poppins', sans-serif;
-            height: 54px;
-            color: #2c3e50;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .modern-input:focus {
-            border-color: #667eea;
-            background: white;
-            outline: none;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.1);
-            padding-left: 50px;
-        }
-
-        .modern-input::placeholder {
-            color: #adb5bd;
-            font-weight: 400;
-        }
-
-        .input-focus-line {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transition: width 0.3s ease;
-        }
-
-        .modern-input:focus ~ .input-focus-line {
-            width: 100%;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #6c757d;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 5px;
-            transition: color 0.3s ease;
-            z-index: 2;
-        }
-
-        .password-toggle:hover {
-            color: #667eea;
-        }
-
-        .field-hint {
-            color: #6c757d;
-            font-size: 12px;
-            margin-top: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding-left: 5px;
-        }
-
-        .field-hint i {
-            color: #667eea;
-            font-size: 11px;
-        }
-
-        .form-options-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 25px 0 30px;
-        }
-
-        .modern-checkbox {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            position: relative;
-            user-select: none;
-        }
-
-        .modern-checkbox input {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-            height: 0;
-            width: 0;
-        }
-
-        .checkmark {
-            position: relative;
-            height: 20px;
-            width: 20px;
-            background-color: white;
-            border: 2px solid #dee2e6;
-            border-radius: 5px;
-            margin-right: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .modern-checkbox:hover input ~ .checkmark {
-            border-color: #667eea;
-        }
-
-        .modern-checkbox input:checked ~ .checkmark {
-            background-color: #667eea;
-            border-color: #667eea;
-        }
-
-        .checkmark:after {
-            content: "";
-            position: absolute;
-            display: none;
-            left: 6px;
-            top: 2px;
-            width: 5px;
-            height: 10px;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-        }
-
-        .modern-checkbox input:checked ~ .checkmark:after {
-            display: block;
-        }
-
-        .checkbox-label {
-            color: #495057;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .forgot-password-link {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .forgot-password-link:hover {
-            color: #764ba2;
-            text-decoration: underline;
-        }
-
-        .forgot-password-link i {
-            font-size: 13px;
-        }
-
-        .submit-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 18px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            margin-bottom: 30px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            font-family: 'Poppins', sans-serif;
-            height: 56px;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .submit-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
-        }
-
-        .submit-button:active {
-            transform: translateY(-1px);
-        }
-
-        .button-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            transition: opacity 0.3s ease;
-        }
-
-        .button-text {
-            letter-spacing: 0.5px;
-        }
-
-        .button-loading {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .divider-with-text {
-            display: flex;
-            align-items: center;
-            margin: 30px 0;
-            color: #6c757d;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .divider-line {
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(to right, transparent, #e1e5e9, transparent);
-        }
-
-        .divider-text {
-            padding: 0 15px;
-            background: white;
-            position: relative;
-        }
-
-        .social-login-buttons {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .social-button {
-            flex: 1;
-            padding: 14px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            border: 2px solid #e1e5e9;
-            background: white;
-            color: #333;
-            font-size: 14px;
-            font-family: 'Poppins', sans-serif;
-            cursor: pointer;
-        }
-
-        .social-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .google-button {
-            color: #DB4437;
-            border-color: #e1e5e9;
-        }
-
-        .google-button:hover {
-            background: #f8f9fa;
-            border-color: #DB4437;
-        }
-
-        .microsoft-button {
-            color: #00a4ef;
-            border-color: #e1e5e9;
-        }
-
-        .microsoft-button:hover {
-            background: #f8f9fa;
-            border-color: #00a4ef;
-        }
-
-        /* Registration Section */
-        .registration-section {
-            padding: 25px 0;
-            border-top: 1px solid #eaeaea;
-            margin-top: 25px;
-        }
-
-        .registration-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .registration-icon {
-            font-size: 20px;
-            color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
-            padding: 12px;
-            border-radius: 50%;
-        }
-
-        .registration-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .registration-question {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-
-        .registration-link {
-            color: #667eea;
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .registration-link:hover {
-            color: #764ba2;
-            gap: 10px;
-        }
-
-        .registration-link i {
-            font-size: 12px;
-            transition: transform 0.2s ease;
-        }
-
-        .registration-link:hover i {
-            transform: translateX(4px);
-        }
-
-        /* Demo Accounts Section */
-        .demo-section {
-            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-            padding: 25px;
-            border-radius: 15px;
-            margin-top: 35px;
-            border: 1px solid rgba(102, 126, 234, 0.1);
-        }
-
-        .demo-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .demo-icon {
-            font-size: 24px;
-            color: #667eea;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .demo-title {
-            color: #667eea;
-            font-weight: 700;
-            margin-bottom: 5px;
-            font-size: 18px;
-        }
-
-        .demo-subtitle {
-            color: #6c757d;
-            font-size: 14px;
-            margin-bottom: 0;
-        }
-
-        .demo-cards {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .demo-card {
-            flex: 1;
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
-            transition: transform 0.3s ease;
-        }
-
-        .demo-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .demo-card-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .demo-card-header i {
-            font-size: 18px;
-        }
-
-        .admin-card .demo-card-header i {
-            color: #ffc107;
-        }
-
-        .customer-card .demo-card-header i {
-            color: #28a745;
-        }
-
-        .demo-card-title {
-            font-weight: 600;
-            color: #495057;
-            font-size: 15px;
-        }
-
-        .demo-credential {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .credential-label {
-            color: #6c757d;
-            font-size: 13px;
-            min-width: 70px;
-        }
-
-        .credential-value {
-            background: #f8f9fa;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            color: #495057;
-            border: 1px solid #e1e5e9;
-        }
-
-        .demo-note {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px dashed #e1e5e9;
-            color: #6c757d;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .demo-security-notice {
-            background: rgba(220, 53, 69, 0.05);
-            border: 1px solid rgba(220, 53, 69, 0.2);
-            border-radius: 8px;
-            padding: 12px 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 12px;
-            color: #dc3545;
-        }
-
-        .demo-security-notice i {
-            font-size: 14px;
-        }
-
+        
         /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .demo-cards {
-                flex-direction: column;
-            }
-
-            .social-login-buttons {
-                flex-direction: column;
-            }
-
-            .form-options-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .registration-container {
-                flex-direction: column;
-                text-align: center;
-                gap: 10px;
-            }
-
-            .registration-icon {
-                margin-bottom: 5px;
-            }
-        }
-
         @media (max-width: 480px) {
-            .form-header h2 {
-                font-size: 20px;
+            body {
+                padding: 16px;
+                background: white;
             }
-
-            .form-subtitle {
-                font-size: 13px;
+            
+            .login-card {
+                padding: 32px 24px;
+                box-shadow: none;
+                border: none;
+                background: transparent;
             }
-
-            .modern-input {
-                height: 50px;
-                font-size: 14px;
+            
+            .login-wrapper {
+                max-width: 100%;
             }
-
-            .submit-button {
-                height: 52px;
-                font-size: 15px;
+            
+            .background-container {
+                display: none;
             }
-
-            .login-box {
-                padding: 35px 25px;
-                max-width: 95%;
-                margin: 20px;
+            
+            body {
+                background: white;
             }
         }
     </style>
@@ -853,128 +526,176 @@ if (empty($image_url)) {
 <!-- Background container -->
 <div class="background-container"></div>
 
-<!-- Login Wrapper -->
 <div class="login-wrapper">
-    <div class="login-box">
-        <!-- Login Header -->
+    <div class="login-card">
+        <!-- Header -->
         <div class="login-header">
-            <i class="fas fa-sign-in-alt"></i>
-            <h1>Sign in to Speedy Wheels</h1>
-            <p>Enter your credentials to access your account</p>
+            <h1>Sign in to your account</h1>
+            <p>Enter your credentials to continue</p>
         </div>
-
+        
         <!-- Error Message -->
         <?php if (!empty($error)): ?>
-            <div class="alert-box alert-error">
-                <div style="display: flex; align-items: center;">
-                    <i class="fas fa-exclamation-triangle me-3" style="font-size: 20px;"></i>
-                    <div>
-                        <strong style="display: block; margin-bottom: 3px;">Error</strong>
-                        <?= htmlspecialchars($error) ?>
-                    </div>
-                </div>
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <span><?= htmlspecialchars($error) ?></span>
             </div>
         <?php endif; ?>
 
         <!-- Success Message -->
         <?php if (!empty($_SESSION['success_message'])): ?>
-            <div class="alert-box alert-success">
-                <div style="display: flex; align-items: center;">
-                    <i class="fas fa-check-circle me-3" style="font-size: 20px;"></i>
-                    <div>
-                        <?= htmlspecialchars($_SESSION['success_message']) ?>
-                    </div>
-                </div>
+            <div class="success-message">
+                <i class="fas fa-check-circle"></i>
+                <span><?= htmlspecialchars($_SESSION['success_message']) ?></span>
             </div>
             <?php unset($_SESSION['success_message']); ?>
         <?php endif; ?>
 
+        <!-- Login Form -->
+        <form method="POST" action="<?= htmlspecialchars($_SERVER['PHP_SELF']); ?>" id="loginForm">
+            <!-- Email or Username -->
+            <div class="form-group">
+                <label class="form-label">Email or Username</label>
+                <input
+                    type="text"
+                    name="username"
+                    class="form-control"
+                    placeholder="Enter your email or username"
+                    value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="Enter your password"
+                    required
+                >
+            </div>
+
+            <!-- Remember Me -->
+            <div class="remember-me">
+                <input type="checkbox" id="rememberMe" name="rememberMe">
+                <label for="rememberMe">Remember me</label>
+            </div>
+
+            <!-- Login Button -->
+            <button type="submit" class="login-button">
+                Log in
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+            <span>or sign in with</span>
+        </div>
+
+        <!-- Social Login Buttons -->
+        <div class="social-buttons">
+            <a href="#" class="social-button facebook">
+                <i class="fab fa-facebook-f"></i>
+                Continue with Facebook
+            </a>
+            <a href="#" class="social-button google">
+                <i class="fab fa-google"></i>
+                Log in with Google
+            </a>
+        </div>
+
+        <!-- Register Link -->
+        <div class="register-section">
+            <p>Don't have an account?</p>
+            <a href="<?= base_url('src/modules/auth/register.php'); ?>" class="register-link">
+                Create an account
+            </a>
+        </div>
+
+        <!-- Demo Accounts -->
+        <div class="demo-accounts">
+            <div class="demo-title">
+                <i class="fas fa-info-circle"></i>
+                <span>Demo Accounts</span>
+            </div>
+            <div class="demo-account">
+                <div class="account-type">Admin Account</div>
+                <div class="account-details">
+                    <strong>Username:</strong> admin &nbsp;|&nbsp;
+                    <strong>Password:</strong> admin123
+                </div>
+            </div>
+            <div class="demo-account">
+                <div class="account-type">Customer Account</div>
+                <div class="account-details">
+                    <strong>Username:</strong> john_doe &nbsp;|&nbsp;
+                    <strong>Password:</strong> customer123
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-    // Password visibility toggle
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('passwordInput');
-
-    if (togglePassword && passwordInput) {
-        togglePassword.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-        });
-    }
-
-    // Form submission loading state
-    const loginForm = document.getElementById('loginForm');
-    const submitButton = loginForm.querySelector('.submit-button');
-    const buttonContent = submitButton.querySelector('.button-content');
-    const buttonLoading = submitButton.querySelector('.button-loading');
-
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            const username = this.querySelector('[name="username"]').value.trim();
-            const password = this.querySelector('[name="password"]').value;
-
-            if (!username || !password) {
-                e.preventDefault();
-                showError('Please fill in both fields');
-                return false;
-            }
-
-            // Show loading state
-            buttonContent.style.opacity = '0';
-            buttonLoading.style.opacity = '1';
-            submitButton.disabled = true;
-
-            return true;
-        });
-    }
-
-    function showError(message) {
-        // Create error alert if not exists
-        let errorAlert = document.querySelector('.alert-error');
-        if (!errorAlert) {
-            const formHeader = document.querySelector('.form-header');
-            errorAlert = document.createElement('div');
-            errorAlert.className = 'alert-box alert-error';
-            errorAlert.innerHTML = `
-                <div style="display: flex; align-items: center;">
-                    <i class="fas fa-exclamation-triangle me-3" style="font-size: 20px;"></i>
-                    <div>
-                        <strong style="display: block; margin-bottom: 3px;">Error</strong>
-                        ${message}
-                    </div>
-                </div>
-            `;
-            formHeader.parentNode.insertBefore(errorAlert, formHeader.nextSibling);
-
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                errorAlert.remove();
-            }, 5000);
+    // Form validation
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        const username = this.querySelector('[name="username"]').value.trim();
+        const password = this.querySelector('[name="password"]').value;
+        const submitBtn = this.querySelector('.login-button');
+        
+        if (!username || !password) {
+            e.preventDefault();
+            
+            // Highlight empty fields
+            const inputs = this.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.style.borderColor = '#dc2626';
+                    input.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+                    
+                    setTimeout(() => {
+                        input.style.borderColor = '';
+                        input.style.boxShadow = '';
+                    }, 2000);
+                }
+            });
+            
+            return false;
         }
-    }
-
-    // Add focus effects
-    const inputs = document.querySelectorAll('.modern-input');
+        
+        // Add loading state
+        submitBtn.innerHTML = 'Logging in...';
+        submitBtn.style.opacity = '0.7';
+        submitBtn.disabled = true;
+        
+        return true;
+    });
+    
+    // Input focus effects
+    const inputs = document.querySelectorAll('.form-control');
     inputs.forEach(input => {
         input.addEventListener('focus', function() {
-            this.parentElement.classList.add('focused');
+            this.parentElement.style.transform = 'translateY(-1px)';
         });
+        
         input.addEventListener('blur', function() {
-            this.parentElement.classList.remove('focused');
+            this.parentElement.style.transform = 'translateY(0)';
         });
     });
-
-    // Social button handlers
-    document.querySelectorAll('.social-button').forEach(button => {
-        button.addEventListener('click', function() {
-            const provider = this.classList.contains('google-button') ? 'Google' : 'Microsoft';
-            showError(`${provider} login is not yet implemented. Please use the form above.`);
+    
+    // Social button hover effects
+    const socialButtons = document.querySelectorAll('.social-button');
+    socialButtons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-1px)';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
         });
     });
 </script>

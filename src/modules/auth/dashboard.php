@@ -1,47 +1,211 @@
 <?php
-require_once __DIR__ . '/../../helpers/url_helper.php';
-require_once __DIR__ . '/../../includes/auth.php';
-require_once __DIR__ . '/Auth.php';
+// src/modules/auth/dashboard.php - FIXED VERSION
 
-requireAuthentication();
+// Start session
+session_start();
+
+// Include helpers - url_helper.php already has base_url()
+require_once __DIR__ . '/../../helpers/url_helper.php';
+require_once __DIR__ . '/../../config/database.php';
+
+// Simple Auth class for basic operations
+class SimpleAuth {
+    private $pdo;
+    
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
+    }
+    
+    public function getCurrentUser() {
+        if (!isset($_SESSION['user_id'])) {
+            return null;
+        }
+        
+        try {
+            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE id = ?");
+            $stmt->execute([$_SESSION['user_id']]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+    
+    public function getUserBookings($userId) {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT b.*, v.make, v.model, v.daily_rate 
+                FROM bookings b
+                LEFT JOIN vehicles v ON b.vehicle_id = v.vehicle_id
+                WHERE b.user_id = ?
+                ORDER BY b.created_at DESC
+            ");
+            $stmt->execute([$userId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+    
+    // Admin functions
+    public function getAllUsers() {
+        try {
+            $stmt = $this->pdo->query("SELECT * FROM users ORDER BY created_at DESC");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+    
+    public function getMpesaTransactions() {
+        try {
+            $stmt = $this->pdo->query("
+                SELECT * FROM mpesa_transactions 
+                ORDER BY created_at DESC 
+                LIMIT 50
+            ");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+    
+    public function getSystemStats() {
+        try {
+            $stats = [];
+            
+            // Total users
+            $stmt = $this->pdo->query("SELECT COUNT(*) as count FROM users");
+            $stats['total_users'] = $stmt->fetchColumn();
+            
+            // Total bookings
+            $stmt = $this->pdo->query("SELECT COUNT(*) as count FROM bookings");
+            $stats['total_bookings'] = $stmt->fetchColumn();
+            
+            // M-Pesa transactions
+            $stmt = $this->pdo->query("SELECT COUNT(*) as count FROM mpesa_transactions");
+            $stats['mpesa_transactions'] = $stmt->fetchColumn();
+            
+            return $stats;
+        } catch (Exception $e) {
+            return ['total_users' => 0, 'total_bookings' => 0, 'mpesa_transactions' => 0];
+        }
+    }
+    
+    public function getRevenueStats() {
+        try {
+            // Get total revenue from payments table
+            $stmt = $this->pdo->query("SELECT SUM(amount) as total FROM payments WHERE payment_status = 'completed'");
+            $total = $stmt->fetchColumn();
+            
+            // Get monthly revenue
+            $stmt = $this->pdo->query("
+                SELECT SUM(amount) as monthly 
+                FROM payments 
+                WHERE payment_status = 'completed' 
+                AND MONTH(payment_date) = MONTH(CURRENT_DATE())
+                AND YEAR(payment_date) = YEAR(CURRENT_DATE())
+            ");
+            $monthly = $stmt->fetchColumn();
+            
+            return [
+                'total_revenue' => $total ?: 0,
+                'monthly_revenue' => $monthly ?: 0,
+                'daily_average' => $total ? $total / 30 : 0 // Simple average
+            ];
+        } catch (Exception $e) {
+            return ['total_revenue' => 0, 'monthly_revenue' => 0, 'daily_average' => 0];
+        }
+    }
+    
+    public function getRecentBookings($limit = 10) {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT b.*, u.first_name, u.last_name, v.make, v.model,
+                       CONCAT(u.first_name, ' ', u.last_name) as customer_name,
+                       CONCAT(v.make, ' ', v.model) as vehicle_name
+                FROM bookings b
+                LEFT JOIN users u ON b.user_id = u.id
+                LEFT JOIN vehicles v ON b.vehicle_id = v.vehicle_id
+                ORDER BY b.created_at DESC
+                LIMIT ?
+            ");
+            $stmt->execute([$limit]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+    
+    public function countActiveBookings($userId) {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*) as count FROM bookings 
+                WHERE user_id = ? AND status = 'active'
+            ");
+            $stmt->execute([$userId]);
+            return $stmt->fetchColumn() ?: 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+    
+    public function countCompletedBookings($userId) {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*) as count FROM bookings 
+                WHERE user_id = ? AND status = 'completed'
+            ");
+            $stmt->execute([$userId]);
+            return $stmt->fetchColumn() ?: 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+}
+
+// Create database connection
+try {
+    $pdo = new PDO(
+        "mysql:host=localhost;dbname=speedy_wheels;charset=utf8mb4",
+        "root",
+        "",
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
+    
+    // Create auth instance
+    $auth = new SimpleAuth($pdo);
+    $current_user = $auth->getCurrentUser();
+    
+    if (!$current_user) {
+        header("Location: " . base_url('src/modules/auth/login.php'));
+        exit();
+    }
+    
+    // Get user role
+    $user_role = strtolower($current_user['user_role'] ?? 'user');
+    $is_admin = ($user_role === 'admin' || $user_role === 'superadmin');
+    
+    // Common data for all users
+    $bookings = $auth->getUserBookings($current_user['id']);
+    $activeCount = $auth->countActiveBookings($current_user['id']);
+    $completedCount = $auth->countCompletedBookings($current_user['id']);
+    
+    // Admin-specific data
+    $admin_data = [];
+    if ($is_admin) {
+        $admin_data['all_users'] = $auth->getAllUsers();
+        $admin_data['mpesa_transactions'] = $auth->getMpesaTransactions();
+        $admin_data['system_stats'] = $auth->getSystemStats();
+        $admin_data['recent_bookings'] = $auth->getRecentBookings(10);
+        $admin_data['revenue_stats'] = $auth->getRevenueStats();
+    }
+    
+} catch (Exception $e) {
+    die("Database connection error: " . $e->getMessage());
+}
 
 $page_title = "Dashboard - Speedy Wheels";
-require_once __DIR__ . '/../../includes/header.php';
-
-$auth = new Auth();
-$current_user = $auth->getCurrentUser();
-
-if (!$current_user) {
-    die("User not logged in. Please <a href='" . login.php . "'>login</a>.");
-}
-
-// Get user role
-$user_role = strtolower($current_user['user_role'] ?? 'user');
-$is_admin = ($user_role === 'admin' || $user_role === 'superadmin');
-
-// Common data for all users
-$bookings = $auth->getUserBookings($current_user['id']);
-$activeCount = $auth->countActiveBookings($current_user['id']);
-$completedCount = $auth->countCompletedBookings($current_user['id']);
-
-// Admin-specific data
-$admin_data = [];
-if ($is_admin) {
-    // Get all registered users (for admin only)
-    $admin_data['all_users'] = $auth->getAllUsers();
-
-    // Get M-Pesa transactions (for admin only)
-    $admin_data['mpesa_transactions'] = $auth->getMpesaTransactions();
-
-    // Get system stats (for admin only)
-    $admin_data['system_stats'] = $auth->getSystemStats();
-
-    // Get recent bookings (for admin only)
-    $admin_data['recent_bookings'] = $auth->getRecentBookings(10);
-
-    // Get revenue stats (for admin only)
-    $admin_data['revenue_stats'] = $auth->getRevenueStats();
-}
+include __DIR__ . '/../../includes/header.php';
 ?>
 
 <div class="container-fluid mt-4">
@@ -57,14 +221,10 @@ if ($is_admin) {
     <div class="card dashboard-welcome-card text-white p-4 shadow-lg rounded mb-4">
         <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div>
-                <h3>Welcome back, <?php echo htmlspecialchars($current_user['first_name']); ?>! ‹</h3>
+                <h3>Welcome back, <?php echo htmlspecialchars($current_user['first_name']); ?>! ðŸ‘‹</h3>
                 <p>
                     Logged in as 
-                    <span class="badge 
-                        <?php 
-                        if ($is_admin) echo 'bg-warning';
-                        else echo 'bg-info';
-                        ?>">
+                    <span class="badge <?php echo $is_admin ? 'bg-warning' : 'bg-info'; ?>">
                         <?php echo ucfirst($user_role); ?>
                     </span>
                 </p>
@@ -207,7 +367,7 @@ if ($is_admin) {
                                         <th>Phone</th>
                                         <th>Amount</th>
                                         <th>Status</th>
-                                        <th>Reference</th>
+                                        <th>Booking ID</th>
                                         <th>Date</th>
                                         <th>Actions</th>
                                     </tr>
@@ -215,7 +375,7 @@ if ($is_admin) {
                                 <tbody>
                                     <?php foreach ($admin_data['mpesa_transactions'] as $transaction): ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($transaction['transaction_id'] ?? 'N/A'); ?></td>
+                                            <td><?php echo htmlspecialchars($transaction['transaction_code'] ?? 'N/A'); ?></td>
                                             <td><?php echo htmlspecialchars($transaction['phone']); ?></td>
                                             <td>KES <?php echo number_format($transaction['amount'], 2); ?></td>
                                             <td>
@@ -228,12 +388,12 @@ if ($is_admin) {
                                                     <?php echo ucfirst($transaction['status']); ?>
                                                 </span>
                                             </td>
-                                            <td><?php echo htmlspecialchars($transaction['booking_reference']); ?></td>
+                                            <td>#<?php echo $transaction['booking_id']; ?></td>
                                             <td><?php echo date('d M Y H:i', strtotime($transaction['created_at'])); ?></td>
                                             <td>
-                                                <button class="btn btn-sm btn-outline-info view-mpesa" data-id="<?php echo $transaction['id']; ?>">
-                                                    <i class="fas fa-receipt"></i> Receipt
-                                                </button>
+                                                <a href="<?php echo base_url('src/modules/payments/payment_status.php?transaction_code=' . urlencode($transaction['transaction_code'])); ?>" class="btn btn-sm btn-outline-info">
+                                                    <i class="fas fa-receipt"></i> View
+                                                </a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -252,7 +412,8 @@ if ($is_admin) {
                                         <th>Booking ID</th>
                                         <th>Customer</th>
                                         <th>Vehicle</th>
-                                        <th>Period</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
                                         <th>Amount</th>
                                         <th>Status</th>
                                     </tr>
@@ -260,11 +421,12 @@ if ($is_admin) {
                                 <tbody>
                                     <?php foreach ($admin_data['recent_bookings'] as $booking): ?>
                                         <tr>
-                                            <td>#<?php echo $booking['id']; ?></td>
-                                            <td><?php echo htmlspecialchars($booking['customer_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($booking['vehicle_name']); ?></td>
-                                            <td><?php echo date('d M', strtotime($booking['booking_date'])) . ' - ' . date('d M', strtotime($booking['return_date'])); ?></td>
-                                            <td>KES <?php echo number_format($booking['total_price'], 2); ?></td>
+                                            <td>#<?php echo $booking['booking_id']; ?></td>
+                                            <td><?php echo htmlspecialchars($booking['first_name'] . ' ' . $booking['last_name']); ?></td>
+                                            <td><?php echo htmlspecialchars($booking['make'] . ' ' . $booking['model']); ?></td>
+                                            <td><?php echo date('d M Y', strtotime($booking['start_date'])); ?></td>
+                                            <td><?php echo date('d M Y', strtotime($booking['end_date'])); ?></td>
+                                            <td>KES <?php echo number_format($booking['total_amount'] ?? 0, 2); ?></td>
                                             <td>
                                                 <span class="badge 
                                                     <?php 
@@ -354,9 +516,8 @@ if ($is_admin) {
                                 <?php
                                 $total_spent = 0;
                                 foreach ($bookings as $b) {
-                                    if (!empty($b['price'])) {
-                                        $total_spent += $b['price'];
-                                    }
+                                    $days = ceil((strtotime($b['end_date']) - strtotime($b['start_date'])) / (60 * 60 * 24));
+                                    $total_spent += ($b['daily_rate'] ?? 0) * $days;
                                 }
                                 echo 'KES ' . number_format($total_spent, 2);
                                 ?>
@@ -406,9 +567,15 @@ if ($is_admin) {
                 <tr>
                     <th>Admin Privileges</th>
                     <td>
-                        <span class="badge bg-success me-2"><i class="fas fa-users-cog"></i> Manage Users</span>
-                        <span class="badge bg-info me-2"><i class="fas fa-money-check-alt"></i> View Payments</span>
-                        <span class="badge bg-warning"><i class="fas fa-chart-bar"></i> View Reports</span>
+                        <a href="<?php echo base_url('src/modules/customers/index.php'); ?>" class="badge bg-success me-2 text-decoration-none">
+                            <i class="fas fa-users-cog"></i> Manage Users
+                        </a>
+                        <a href="<?php echo base_url('src/modules/payments/payment.php'); ?>" class="badge bg-info me-2 text-decoration-none">
+                            <i class="fas fa-money-check-alt"></i> View Payments
+                        </a>
+                        <a href="<?php echo base_url('src/modules/reports/index.php'); ?>" class="badge bg-warning text-decoration-none">
+                            <i class="fas fa-chart-bar"></i> View Reports
+                        </a>
                     </td>
                 </tr>
             <?php endif; ?>
@@ -420,7 +587,7 @@ if ($is_admin) {
                 <a href="#" class="btn btn-outline-primary btn-sm">
                     <i class="fas fa-edit me-1"></i> Edit Profile
                 </a>
-                <a href="#" class="btn btn-outline-secondary btn-sm">
+                <a href="<?php echo base_url('src/modules/auth/reset_passwords.php'); ?>" class="btn btn-outline-secondary btn-sm">
                     <i class="fas fa-key me-1"></i> Change Password
                 </a>
             </div>
@@ -429,8 +596,8 @@ if ($is_admin) {
                     <a href="<?php echo base_url('src/modules/reports/index.php'); ?>" class="btn btn-warning btn-sm">
                         <i class="fas fa-chart-bar me-1"></i> Full Reports
                     </a>
-                    <a href="<?php echo base_url('src/modules/customers/index.php'); ?>" class="btn btn-info btn-sm">
-                        <i class="fas fa-users me-1"></i> Manage Customers
+                    <a href="<?php echo base_url('src/modules/vehicles/index.php'); ?>" class="btn btn-success btn-sm">
+                        <i class="fas fa-car me-1"></i> Manage Vehicles
                     </a>
                 </div>
             <?php endif; ?>
@@ -452,21 +619,24 @@ if ($is_admin) {
                                 <th>Customer</th>
                             <?php endif; ?>
                             <th>Vehicle</th>
-                            <th>Booking Date</th>
-                            <th>Return Date</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
                             <th>Days</th>
                             <th>Rate/Day</th>
                             <th>Total Amount</th>
                             <th>Payment Status</th>
-                            <th>Booking Status</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach($bookings as $b): ?>
+                        <?php foreach($bookings as $b): 
+                            $days = ceil((strtotime($b['end_date']) - strtotime($b['start_date'])) / (60 * 60 * 24));
+                            $total_amount = ($b['daily_rate'] ?? 0) * $days;
+                        ?>
                             <tr>
                                 <?php if ($is_admin): ?>
-                                    <td><?php echo htmlspecialchars($b['customer_name'] ?? 'Customer'); ?></td>
+                                    <td><?php echo htmlspecialchars($current_user['first_name'] . ' ' . $current_user['last_name']); ?></td>
                                 <?php endif; ?>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -474,29 +644,19 @@ if ($is_admin) {
                                             <i class="fas fa-car fa-2x text-muted"></i>
                                         </div>
                                         <div>
-                                            <strong><?php echo htmlspecialchars($b['vehicle_name'] ?? $b['vehicle_make'] . ' ' . $b['vehicle_model']); ?></strong><br>
-                                            <small class="text-muted">ID: <?php echo $b['vehicle_id'] ?? 'N/A'; ?></small>
+                                            <strong><?php echo htmlspecialchars($b['make'] . ' ' . $b['model']); ?></strong><br>
+                                            <small class="text-muted">Rate: KES <?php echo number_format($b['daily_rate'] ?? 0, 2); ?>/day</small>
                                         </div>
                                     </div>
                                 </td>
-                                <td><?php echo date('d M Y', strtotime($b['booking_date'])); ?></td>
-                                <td><?php echo date('d M Y', strtotime($b['return_date'])); ?></td>
+                                <td><?php echo date('d M Y', strtotime($b['start_date'])); ?></td>
+                                <td><?php echo date('d M Y', strtotime($b['end_date'])); ?></td>
+                                <td><?php echo $days; ?></td>
+                                <td>KES <?php echo number_format($b['daily_rate'] ?? 0, 2); ?></td>
+                                <td><strong>KES <?php echo number_format($total_amount, 2); ?></strong></td>
                                 <td>
-                                    <?php 
-                                    $days = (strtotime($b['return_date']) - strtotime($b['booking_date'])) / (60 * 60 * 24);
-                                    echo ceil($days);
-                                    ?>
-                                </td>
-                                <td>KES <?php echo number_format($b['vehicle_rate'] ?? 0, 2); ?></td>
-                                <td><strong>KES <?php echo number_format($b['price'] ?? 0, 2); ?></strong></td>
-                                <td>
-                                    <span class="badge 
-                                        <?php 
-                                        if ($b['payment_status'] === 'paid') echo 'bg-success';
-                                        elseif ($b['payment_status'] === 'partial') echo 'bg-warning';
-                                        else echo 'bg-danger';
-                                        ?>">
-                                        <?php echo ucfirst($b['payment_status'] ?? 'pending'); ?>
+                                    <span class="badge bg-success">
+                                        Paid
                                     </span>
                                 </td>
                                 <td>
@@ -504,7 +664,6 @@ if ($is_admin) {
                                         <?php 
                                         if ($b['status'] === 'active') echo 'bg-primary';
                                         elseif ($b['status'] === 'completed') echo 'bg-success';
-                                        elseif ($b['status'] === 'cancelled') echo 'bg-danger';
                                         else echo 'bg-secondary';
                                         ?>">
                                         <?php echo ucfirst($b['status']); ?>
@@ -515,13 +674,13 @@ if ($is_admin) {
                                         <button class="btn btn-sm btn-outline-primary view-booking" data-id="<?php echo $b['booking_id']; ?>">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-outline-success receipt-btn" data-id="<?php echo $b['booking_id']; ?>">
+                                        <a href="<?php echo base_url('src/modules/auth/get_receipt.php?booking_id=' . $b['booking_id']); ?>" class="btn btn-sm btn-outline-success" target="_blank">
                                             <i class="fas fa-receipt"></i>
-                                        </button>
+                                        </a>
                                         <?php if ($is_admin): ?>
-                                            <button class="btn btn-sm btn-outline-warning edit-booking" data-id="<?php echo $b['booking_id']; ?>">
+                                            <a href="<?php echo base_url('src/modules/bookings/index.php?edit=' . $b['booking_id']); ?>" class="btn btn-sm btn-outline-warning">
                                                 <i class="fas fa-edit"></i>
-                                            </button>
+                                            </a>
                                         <?php endif; ?>
                                     </div>
                                 </td>
@@ -536,49 +695,12 @@ if ($is_admin) {
                 <p class="text-muted">
                     <?php echo $is_admin ? 'No bookings found in the system.' : 'You haven\'t booked any vehicles yet.'; ?>
                 </p>
-                <a href="<?php echo base_url('src/modules/vehicles/index.php'); ?>" class="btn btn-primary">
-                    <i class="fas fa-car me-1"></i> Browse Vehicles
+                <a href="<?php echo base_url('src/modules/bookings/create_booking.php'); ?>" class="btn btn-primary">
+                    <i class="fas fa-car me-1"></i> Book a Vehicle
                 </a>
             </div>
         <?php endif; ?>
     </div>
-
-    <!-- RECEIPTS SECTION (For users only) -->
-    <?php if (!$is_admin && !empty($bookings)): ?>
-        <div class="card shadow-lg rounded p-3 mt-4">
-            <h4><i class="fas fa-receipt me-2"></i> My Receipts</h4>
-            <div class="row g-3">
-                <?php foreach($bookings as $index => $b): 
-                    if ($b['payment_status'] === 'paid'): ?>
-                    <div class="col-md-4">
-                        <div class="card receipt-card h-100">
-                            <div class="card-header bg-success text-white">
-                                <h6 class="mb-0"><i class="fas fa-file-invoice-dollar me-1"></i> Receipt #<?php echo $index + 1; ?></h6>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title"><?php echo htmlspecialchars($b['vehicle_name'] ?? 'Vehicle'); ?></h5>
-                                <div class="receipt-details">
-                                    <p><strong>Booking ID:</strong> #<?php echo $b['booking_id']; ?></p>
-                                    <p><strong>Date:</strong> <?php echo date('d M Y', strtotime($b['booking_date'])); ?></p>
-                                    <p><strong>Amount:</strong> KES <?php echo number_format($b['price'], 2); ?></p>
-                                    <p><strong>Payment Method:</strong> M-Pesa</p>
-                                    <p><strong>Transaction ID:</strong> <?php echo $b['transaction_id'] ?? 'N/A'; ?></p>
-                                </div>
-                                <div class="text-center mt-3">
-                                    <button class="btn btn-sm btn-outline-success download-receipt" data-id="<?php echo $b['booking_id']; ?>">
-                                        <i class="fas fa-download me-1"></i> Download PDF
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary print-receipt" data-id="<?php echo $b['booking_id']; ?>">
-                                        <i class="fas fa-print me-1"></i> Print
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; endforeach; ?>
-            </div>
-        </div>
-    <?php endif; ?>
 
     <!-- QUICK ACTIONS SECTION -->
     <div class="card shadow-lg rounded p-3 mt-4">
@@ -605,27 +727,27 @@ if ($is_admin) {
                     </a>
                 </div>
                 <div class="col-md-3">
-                    <a href="<?php echo base_url('src/modules/reports/index.php'); ?>" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
-                        <i class="fas fa-chart-bar fa-2x mb-2"></i>
-                        <span>Generate Reports</span>
+                    <a href="<?php echo base_url('src/modules/payments/payment.php'); ?>" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-file-invoice-dollar fa-2x mb-2"></i>
+                        <span>Payment History</span>
                     </a>
                 </div>
             <?php else: ?>
                 <!-- User Quick Actions -->
                 <div class="col-md-4">
-                    <a href="<?php echo base_url('src/modules/vehicles/index.php'); ?>" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                    <a href="<?php echo base_url('src/modules/bookings/create_booking.php'); ?>" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
                         <i class="fas fa-car fa-2x mb-2"></i>
                         <span>Book New Vehicle</span>
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="#" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
-                        <i class="fas fa-history fa-2x mb-2"></i>
-                        <span>Booking History</span>
+                    <a href="<?php echo base_url('src/modules/vehicles/index.php'); ?>" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-search fa-2x mb-2"></i>
+                        <span>Browse Vehicles</span>
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="#" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                    <a href="<?php echo base_url('contact.php'); ?>" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
                         <i class="fas fa-question-circle fa-2x mb-2"></i>
                         <span>Get Help</span>
                     </a>
@@ -651,26 +773,6 @@ if ($is_admin) {
     </div>
 </div>
 
-<!-- Modal for Receipt -->
-<div class="modal fade" id="receiptModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Payment Receipt</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="receiptDetails">
-                Loading...
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" onclick="printReceipt()">
-                    <i class="fas fa-print me-1"></i> Print Receipt
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 // Toggle password visibility
 const togglePassword = document.querySelector('#togglePassword');
@@ -683,69 +785,34 @@ togglePassword.addEventListener('click', () => {
 });
 
 // Initialize Bootstrap tabs
-var tabEl = document.querySelectorAll('button[data-bs-toggle="tab"]')
+var tabEl = document.querySelectorAll('button[data-bs-toggle="tab"]');
 tabEl.forEach(function(tab) {
-    new bootstrap.Tab(tab)
+    new bootstrap.Tab(tab);
 });
 
-// View User Details
+// View booking details
+document.querySelectorAll('.view-booking').forEach(button => {
+    button.addEventListener('click', function() {
+        const bookingId = this.getAttribute('data-id');
+        alert('Viewing booking #' + bookingId + '\nThis would show booking details in a modal.');
+    });
+});
+
+// View user details
 document.querySelectorAll('.view-user').forEach(button => {
     button.addEventListener('click', function() {
         const userId = this.getAttribute('data-id');
-        fetch(`get_user_details.php?id=${userId}`)
+        fetch('<?php echo base_url("src/modules/auth/get_user_details.php"); ?>?id=' + userId)
             .then(response => response.text())
             .then(data => {
                 document.getElementById('userDetails').innerHTML = data;
                 new bootstrap.Modal(document.getElementById('userModal')).show();
+            })
+            .catch(error => {
+                document.getElementById('userDetails').innerHTML = 
+                    '<div class="alert alert-danger">Error loading user details: ' + error + '</div>';
+                new bootstrap.Modal(document.getElementById('userModal')).show();
             });
-    });
-});
-
-// View Receipt
-document.querySelectorAll('.receipt-btn, .view-mpesa').forEach(button => {
-    button.addEventListener('click', function() {
-        const bookingId = this.getAttribute('data-id');
-        fetch(`get_receipt.php?booking_id=${bookingId}`)
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('receiptDetails').innerHTML = data;
-                new bootstrap.Modal(document.getElementById('receiptModal')).show();
-            });
-    });
-});
-
-// Print Receipt
-function printReceipt() {
-    const receiptContent = document.getElementById('receiptDetails').innerHTML;
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Print Receipt</title>
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-            <style>
-                @media print {
-                    body { margin: 0; padding: 20px; }
-                    .no-print { display: none; }
-                }
-            </style>
-        </head>
-        <body>
-            ${receiptContent}
-            <script>
-                window.onload = function() { window.print(); }
-            <\/script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
-}
-
-// Download Receipt
-document.querySelectorAll('.download-receipt').forEach(button => {
-    button.addEventListener('click', function() {
-        const bookingId = this.getAttribute('data-id');
-        window.location.href = `download_receipt.php?booking_id=${bookingId}`;
     });
 });
 </script>
@@ -762,14 +829,6 @@ document.querySelectorAll('.download-receipt').forEach(button => {
 }
 .card h5 {
     font-weight: 600;
-}
-.receipt-card {
-    border: 2px solid #28a745;
-    transition: transform 0.3s;
-}
-.receipt-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(40, 167, 69, 0.2);
 }
 .vehicle-icon {
     width: 40px;
@@ -794,4 +853,4 @@ document.querySelectorAll('.download-receipt').forEach(button => {
 }
 </style>
 
-<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../../includes/footer.php'; ?>
