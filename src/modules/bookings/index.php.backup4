@@ -76,23 +76,13 @@ try {
                                 Booking #<?php echo $booking['id'] ?? $booking['booking_id']; ?>
                             </h5>
                             <?php
-                            switch($booking['status']) {
-                                case 'confirmed':
-                                case 'active':
-                                    $status_badge = 'bg-success';
-                                    break;
-                                case 'pending':
-                                    $status_badge = 'bg-warning';
-                                    break;
-                                case 'cancelled':
-                                    $status_badge = 'bg-danger';
-                                    break;
-                                case 'completed':
-                                    $status_badge = 'bg-info';
-                                    break;
-                                default:
-                                    $status_badge = 'bg-secondary';
-                            }
+                            $status_badge = match($booking['status']) {
+                                'confirmed'|'active' => 'bg-success',
+                                'pending' => 'bg-warning',
+                                'cancelled' => 'bg-danger',
+                                'completed' => 'bg-info',
+                                default => 'bg-secondary'
+                            };
                             ?>
                             <span class="badge <?php echo $status_badge; ?>">
                                 <?php echo ucfirst($booking['status'] ?? 'Pending'); ?>
