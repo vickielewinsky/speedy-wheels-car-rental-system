@@ -124,3 +124,6 @@ check_database_tables.php
 quick_email_test.php
 test_*.php
 clean_ai_artifacts.sh
+archive/
+# Archived files
+archive/*
