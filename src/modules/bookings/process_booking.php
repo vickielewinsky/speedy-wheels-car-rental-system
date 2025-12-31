@@ -72,7 +72,6 @@ if ($_POST) {
             throw new Exception("Vehicle selection and rental dates are required.");
         }
 
-        // Calculate rental details
         $start = new DateTime($start_date);
         $end = new DateTime($end_date);
         $rental_days = $start->diff($end)->days;
@@ -81,7 +80,6 @@ if ($_POST) {
             throw new Exception("Rental period must be at least 1 day.");
         }
 
-        // Get vehicle details and calculate pricing
         $vehicle_query = "SELECT * FROM vehicles WHERE vehicle_id = ? AND status = 'available'";
         $vehicle_stmt = $pdo->prepare($vehicle_query);
         $vehicle_stmt->execute([$vehicle_id]);
@@ -121,7 +119,6 @@ if ($_POST) {
 
             if ($existing_customer) {
                 $customer_id = $existing_customer['customer_id'];
-                // Update customer details
                 $update_customer = "UPDATE customers SET name = ?, email = ?, address = ? WHERE customer_id = ?";
                 $update_stmt = $pdo->prepare($update_customer);
                 $update_stmt->execute([$customer_name, $customer_email, $customer_address, $customer_id]);
@@ -153,18 +150,15 @@ if ($_POST) {
         // Commit transaction
         $pdo->commit();
 
-        // EMAIL NOTIFICATION - BOOKING CONFIRMATION
         $emailSent = false;
         $emailMessage = '';
 
         if (!empty($customer_email) && filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
             try {
-                // Include the email service
                 $emailServicePath = $root_dir . '/src/services/EmailService.php';
                 if (file_exists($emailServicePath)) {
                     require_once $emailServicePath;
 
-                    // Load PHPMailer autoloader
                     $autoloadPath = $root_dir . '/vendor/autoload.php';
                     if (file_exists($autoloadPath)) {
                         require_once $autoloadPath;
@@ -204,7 +198,6 @@ if ($_POST) {
                                      </div>';
                 }
             } catch (Exception $e) {
-                // Don't break the booking process if email fails
                 $emailMessage = '<div class="alert alert-warning mt-3">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
                                     <strong>Email service temporarily unavailable.</strong> Booking was created successfully.

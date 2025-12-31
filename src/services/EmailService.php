@@ -1,5 +1,4 @@
 <?php
-// src/services/EmailService.php
 require_once __DIR__ . '/../config/email_config.php';
 
 class EmailService {

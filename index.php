@@ -1,5 +1,4 @@
 <?php
-// index.php - WITH ATTRACTIVE NAVBAR AND CHAUFFEUR FEATURE
 header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
@@ -50,7 +49,7 @@ try {
     error_log("Database error: " . $e->getMessage());
 }
 
-// Clean vehicle name (remove duplicate make) - FIXED: Function was missing in some versions
+// Clean vehicle name (remove duplicate make)
 function getCleanVehicleName($make, $model) {
     if (strpos(strtolower($model), strtolower($make)) !== false) {
         return $model;
@@ -196,10 +195,8 @@ $is_logged_in = isset($_SESSION['user_id']);
 $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
 ?>
 
-<!-- ENHANCED ATTRACTIVE NAVIGATION -->
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top custom-navbar">
   <div class="container">
-    <!-- Brand with enhanced styling -->
     <a class="navbar-brand fw-bold brand-logo" href="<?= base_url('index.php') ?>">
       <i class="fas fa-car me-2"></i>Speedy Wheels
     </a>
@@ -296,7 +293,6 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
   </div>
 </nav>
 
-<!-- HERO SECTION WITH CAR BACKGROUND -->
 <section id="home" class="hero-section" style="
     background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
                 url('<?= base_url('src/assets/images/hero-car.png') ?>');
@@ -538,7 +534,6 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
 </section>
 <?php endif; ?>
 
-<!-- STICKY WHATSAPP BUTTON -->
 <a href="https://wa.me/254799692055" 
    target="_blank" 
    class="whatsapp-float"
@@ -775,7 +770,7 @@ html {
 </style>
 
 <script>
-// Smooth scrolling for navigation
+
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -790,7 +785,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Navbar scroll effect
   window.addEventListener('scroll', function() {
     const navbar = document.querySelector('.custom-navbar');
     if (window.scrollY > 50) {

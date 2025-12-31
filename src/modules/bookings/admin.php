@@ -14,7 +14,6 @@ require_once __DIR__ . '/../../includes/header.php';
 try {
     $pdo = getDatabaseConnection();
 
-    // Fetch all bookings with user and vehicle details
     $bookings_stmt = $pdo->query("
         SELECT 
             b.*,

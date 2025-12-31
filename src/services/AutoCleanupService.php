@@ -100,7 +100,6 @@ class AutoCleanupService {
             $stmt->execute();
             $completed = $stmt->rowCount();
             
-            // Make ALL vehicles available
             $stmt = $this->pdo->prepare("
                 UPDATE vehicles 
                 SET status = 'available',
@@ -140,7 +139,6 @@ class AutoCleanupService {
             $stmt->execute();
             $stats['expired_bookings'] = $stmt->fetchColumn();
             
-            // Unavailable vehicles
             $stmt = $this->pdo->prepare("
                 SELECT COUNT(*) as count 
                 FROM vehicles 

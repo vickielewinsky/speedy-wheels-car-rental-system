@@ -19,7 +19,6 @@ if (isset($_SESSION['user_id'])) {
 // Include database connection
 require_once "../../config/database.php";
 
-// Function to check if email exists
 function emailExists($pdo, $email) {
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
     $stmt->execute([$email]);
@@ -189,7 +188,6 @@ foreach ($possible_paths as $path) {
             line-height: 1.5;
         }
         
-        /* Background container */
         .background-container {
             position: fixed;
             top: 0;
@@ -231,7 +229,6 @@ foreach ($possible_paths as $path) {
             z-index: -1;
         }
         
-        /* Main Register Container */
         .register-wrapper {
             width: 100%;
             max-width: 500px;
@@ -660,7 +657,6 @@ foreach ($possible_paths as $path) {
             }
         });
         
-        // Validate email format
         const emailField = this.querySelector('#email');
         if (emailField.value.trim()) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

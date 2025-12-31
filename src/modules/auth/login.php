@@ -106,7 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             line-height: 1.5;
         }
         
-        /* Background container */
         .background-container {
             position: fixed;
             top: 0;
@@ -173,7 +172,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             z-index: -1;
         }
         
-        /* Main Login Container */
         .login-wrapper {
             width: 100%;
             max-width: 420px;

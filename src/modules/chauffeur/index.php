@@ -29,7 +29,6 @@ try {
         $stmt->execute();
         $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Get available drivers
         $driver_stmt = $pdo->prepare("SELECT * FROM chauffeur_drivers ORDER BY status, driver_name");
         $driver_stmt->execute();
         $drivers = $driver_stmt->fetchAll(PDO::FETCH_ASSOC);

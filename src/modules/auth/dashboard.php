@@ -1,5 +1,5 @@
 <?php
-// src/modules/auth/dashboard.php - FIXED VERSION
+//
 
 // Start session
 session_start();
@@ -790,7 +790,6 @@ tabEl.forEach(function(tab) {
     new bootstrap.Tab(tab);
 });
 
-// View booking details
 document.querySelectorAll('.view-booking').forEach(button => {
     button.addEventListener('click', function() {
         const bookingId = this.getAttribute('data-id');
@@ -798,7 +797,6 @@ document.querySelectorAll('.view-booking').forEach(button => {
     });
 });
 
-// View user details
 document.querySelectorAll('.view-user').forEach(button => {
     button.addEventListener('click', function() {
         const userId = this.getAttribute('data-id');

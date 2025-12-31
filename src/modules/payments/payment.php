@@ -318,7 +318,6 @@ try {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // View details functionality
     document.querySelectorAll('.view-details').forEach(button => {
         button.addEventListener('click', function() {
             const paymentData = JSON.parse(this.getAttribute('data-payment'));

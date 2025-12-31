@@ -16,7 +16,6 @@ class Auth {
      */
     public function login($username, $password) {
         try {
-            // Fetch user by username or email
             $stmt = $this->pdo->prepare("
                 SELECT id, username, email, password_hash, user_role 
                 FROM users 
@@ -34,7 +33,6 @@ class Auth {
                 return ['success' => false, 'error' => 'Invalid username or password'];
             }
 
-            // Verify password against password_hash column
             if (!password_verify($password, $user['password_hash'])) {
                 return ['success' => false, 'error' => 'Invalid username or password'];
             }
@@ -185,7 +183,6 @@ class Auth {
             $stmt->execute();
             $stats['mpesa_transactions'] = $stmt->fetchColumn() ?: 0;
 
-            // Available vehicles
             $stmt = $this->pdo->prepare("SELECT COUNT(*) as total FROM vehicles WHERE status = 'available'");
             $stmt->execute();
             $stats['available_vehicles'] = $stmt->fetchColumn() ?: 0;
@@ -261,7 +258,6 @@ class Auth {
             $stmt->execute();
             $stats['weekly_revenue'] = $stmt->fetchColumn() ?: 0;
 
-            // Calculate daily average
             if ($stats['total_revenue'] > 0) {
                 $stmt = $this->pdo->prepare("
                     SELECT DATEDIFF(MAX(created_at), MIN(created_at)) as days FROM bookings

@@ -1,5 +1,5 @@
 <?php
-// process_payment.php - FIXED: Uses correct payments table structure
+// Process payment
 
 session_start();
 
@@ -36,7 +36,6 @@ try {
         exit();
     }
 
-    // Get user email
     $userId = $_SESSION['user_id'];
     $sql = "SELECT email FROM users WHERE id = ?";
     $stmt = $pdo->prepare($sql);

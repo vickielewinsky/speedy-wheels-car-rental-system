@@ -1,5 +1,5 @@
 <?php
-// src/modules/vehicles/index.php - FOR REGULAR USERS
+//
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . "/../../helpers/url_helper.php";
 require_once __DIR__ . "/../../helpers/url_helper.php";
@@ -15,7 +15,6 @@ require_once __DIR__ . '/../../includes/header.php';
 try {
     $pdo = getDatabaseConnection();
 
-    // Fetch available vehicles
     $vehicles_stmt = $pdo->query("
         SELECT * FROM vehicles 
         WHERE status = 'available' 

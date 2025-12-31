@@ -1,5 +1,5 @@
 <?php
-// src/includes/header.php - FIXED WITH CORRECT PATHS
+//
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {

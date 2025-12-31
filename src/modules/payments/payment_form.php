@@ -1,5 +1,5 @@
 <?php
-// src/modules/payments/payment_form.php - FIXED: Uses correct 'status' column
+// Payment form
 
 session_start();
 
@@ -33,7 +33,6 @@ try {
     // Get user info
     $userId = $_SESSION['user_id'];
     
-    // SIMPLE APPROACH: Get user email and find customer
     $sql = "SELECT email FROM users WHERE id = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$userId]);
@@ -43,7 +42,6 @@ try {
     $customerName = "";
     
     if ($user && isset($user['email'])) {
-        // Find customer by email
         $sql = "SELECT customer_id, name FROM customers WHERE email = ? LIMIT 1";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$user['email']]);

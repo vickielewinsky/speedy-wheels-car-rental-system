@@ -16,7 +16,6 @@ if (file_exists($db_config_path)) {
 try {
     $pdo = getDatabaseConnection();
 
-    // Fetch available vehicles - using correct column names from your schema
     $vehicles_stmt = $pdo->query("SELECT 
         vehicle_id, 
         plate_no,
@@ -341,7 +340,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Customer tab functionality
     const customerTab = new bootstrap.Tab(document.getElementById('existing-customer-tab'));
 
-    // Show customer details when existing customer is selected
     customerSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
 
@@ -384,7 +382,6 @@ document.addEventListener('DOMContentLoaded', function() {
         newCustomerFields.forEach(field => field.value = '');
     });
 
-    // Update vehicle details when vehicle is selected
     vehicleSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         const dailyRate = selectedOption.getAttribute('data-daily-rate');

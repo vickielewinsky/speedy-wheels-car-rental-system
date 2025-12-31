@@ -11,7 +11,6 @@ if (!function_exists('base_url')) {
         $host = $_SERVER['HTTP_HOST'];
         $project_path = '/speedy-wheels-car-rental-system/';
 
-        // Remove trailing slash from project path if present
         $project_path = rtrim($project_path, '/');
 
         return $protocol . $host . $project_path . '/' . ltrim($path, '/');

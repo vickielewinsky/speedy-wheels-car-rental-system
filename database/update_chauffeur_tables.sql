@@ -1,0 +1,2 @@
+-- Run this if you need to add the tables to existing database
+-- Copy the CREATE TABLE statements from Step 1 here
