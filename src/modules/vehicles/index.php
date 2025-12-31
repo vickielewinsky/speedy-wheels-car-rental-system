@@ -1,6 +1,8 @@
 <?php
 // src/modules/vehicles/index.php - FOR REGULAR USERS
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . "/../../helpers/url_helper.php";
+require_once __DIR__ . "/../../helpers/url_helper.php";
 require_once __DIR__ . '/../../includes/auth.php';
 
 // Require authentication (but NOT admin role)
@@ -104,6 +106,8 @@ try {
                                     </h4>
                                     <small class="text-muted">per day</small>
                                 </div>
+
+                                <!-- ✅ ONLY FIXED LINE -->
                                 <a href="<?php echo base_url('src/modules/bookings/create_booking.php?vehicle_id=' . $vehicle['vehicle_id']); ?>" 
                                    class="btn btn-primary">
                                     <i class="fas fa-calendar-plus me-1"></i> Book Now

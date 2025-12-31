@@ -1,57 +1,123 @@
 <?php
-// src/modules/auth/register.php
-// Start output buffering to prevent header issues
-ob_start();
+// src/modules/auth/register.php - MODIFIED VERSION
 
-// Start session at the VERY BEGINNING
+// Start session FIRST
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once "../../config/database.php";
-require_once "Auth.php";
-require_once "../../includes/auth.php";
-
-$page_title = "Register - Speedy Wheels";
-
-// Turn off error display for users (but log them)
-ini_set('display_errors', 0);
+// Enable errors for debugging
+ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// Include header without displaying errors
-ob_start();
-require_once "../../includes/header.php";
-ob_end_clean();
-
-// Redirect if already logged in
-if (isAuthenticated()) {
-    header("Location: " . base_url('index.php'));
+// Check if already logged in
+if (isset($_SESSION['user_id'])) {
+    header("Location: ../index.php");
     exit();
 }
 
+// Include database connection
+require_once "../../config/database.php";
+
+// Function to check if email exists
+function emailExists($pdo, $email) {
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    return $stmt->fetch() !== false;
+}
+
+// Function to check if username exists
+function usernameExists($pdo, $username) {
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    return $stmt->fetch() !== false;
+}
+
+// Handle form submission
 $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get form data
     $user_data = [
-        'username' => $_POST['username'] ?? '',
-        'email' => $_POST['email'] ?? '',
+        'username' => trim($_POST['username'] ?? ''),
+        'email' => trim($_POST['email'] ?? ''),
         'password' => $_POST['password'] ?? '',
-        'first_name' => $_POST['first_name'] ?? '',
-        'last_name' => $_POST['last_name'] ?? '',
-        'phone' => $_POST['phone'] ?? ''
+        'first_name' => trim($_POST['first_name'] ?? ''),
+        'last_name' => trim($_POST['last_name'] ?? ''),
+        'phone' => trim($_POST['phone'] ?? '')
     ];
-
-    $auth = new Auth();
-    $result = $auth->register($user_data);
-
-    if ($result['success']) {
-        $_SESSION['success_message'] = $result['message'];
-        header("Location: " . base_url('src/modules/auth/login.php'));
-        exit();
-    } else {
-        $error = $result['error'];
+    
+    // Validation
+    $required = ['username', 'email', 'password', 'first_name', 'last_name'];
+    foreach ($required as $field) {
+        if (empty($user_data[$field])) {
+            $error = "All fields marked with * are required";
+            break;
+        }
     }
+    
+    if (!$error && !filter_var($user_data['email'], FILTER_VALIDATE_EMAIL)) {
+        $error = "Invalid email format";
+    }
+    
+    if (!$error && strlen($user_data['password']) < 6) {
+        $error = "Password must be at least 6 characters";
+    }
+    
+    if (!$error && usernameExists($pdo, $user_data['username'])) {
+        $error = "Username already exists";
+    }
+    
+    if (!$error && emailExists($pdo, $user_data['email'])) {
+        $error = "Email already registered";
+    }
+    
+    // Proceed with registration
+    if (!$error) {
+        try {
+            // Hash password
+            $password_hash = password_hash($user_data['password'], PASSWORD_DEFAULT);
+            
+            // Insert user
+            $stmt = $pdo->prepare("
+                INSERT INTO users (username, email, password_hash, first_name, last_name, phone, user_role, is_active, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, 'user', 1, NOW())
+            ");
+            
+            $stmt->execute([
+                $user_data['username'],
+                $user_data['email'],
+                $password_hash,
+                $user_data['first_name'],
+                $user_data['last_name'],
+                !empty($user_data['phone']) ? $user_data['phone'] : null
+            ]);
+            
+            $_SESSION['success_message'] = "Registration successful! You can now login.";
+            header("Location: login.php");
+            exit();
+            
+        } catch (PDOException $e) {
+            $error = "Registration failed. Please try again.";
+            error_log("Registration error: " . $e->getMessage());
+        }
+    }
+}
+
+// Simple base_url function
+function base_url($path = '') {
+    $base = 'http://' . $_SERVER['HTTP_HOST'];
+    $script_dir = dirname($_SERVER['SCRIPT_NAME']);
+    
+    if ($script_dir !== '/') {
+        $base .= $script_dir;
+    }
+    
+    $base = rtrim($base, '/');
+    $path = ltrim($path, '/');
+    
+    return $base . '/' . $path;
 }
 
 // Get background image
@@ -59,25 +125,19 @@ $image_url = '';
 $possible_paths = [
     'src/assets/images/hero-car.png',
     'assets/images/hero-car.png',
-    'images/hero-car.png',
-    'hero-car.png'
+    'images/hero-car.png'
 ];
 
 foreach ($possible_paths as $path) {
-    $full_path = $_SERVER['DOCUMENT_ROOT'] . '/speedy-wheels-car-rental-system/' . ltrim($path, '/');
+    $full_path = __DIR__ . '/../../' . $path;
     if (file_exists($full_path)) {
         $image_url = base_url($path);
         break;
     }
 }
-
-if (empty($image_url)) {
-    $local_path = __DIR__ . '/../../../src/assets/images/hero-car.png';
-    if (file_exists($local_path)) {
-        $image_url = base_url('src/assets/images/hero-car.png');
-    }
-}
 ?>
+
+<!-- YOUR EXISTING HTML AND CSS CODE STARTS HERE -->
 <!DOCTYPE html>
 <html lang="en">
 <head>

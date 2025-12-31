@@ -1,13 +1,8 @@
 <?php
-// index.php - WITH ATTRACTIVE NAVBAR AND CHAUFFEUR FEATURE
+// index.php - WITH ATTRACTIVE NAVBAR
 header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
-
-// ADDED: Start session
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 
 require_once __DIR__ . '/src/config/config.php';
 require_once __DIR__ . '/src/config/database.php';
@@ -16,28 +11,16 @@ $page_title = "Home - Speedy Wheels";
 // Ensure base_url function exists
 if (!function_exists('base_url')) {
     function base_url($path = '') {
+        // Adjust this based on your actual base URL structure
         $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'];
+        $project_folder = ''; // Add your project folder name if in subdirectory
         
-        // Auto-detect environment
-        $script_name = $_SERVER['SCRIPT_NAME'] ?? '';
-        $request_uri = $_SERVER['REQUEST_URI'] ?? '';
-        
-        if (strpos($script_name, 'speedy-wheels-car-rental-system') !== false || 
-            strpos($request_uri, 'speedy-wheels-car-rental-system') !== false) {
-            // Apache/XAMPP
-            $base = $protocol . '://' . $host . '/speedy-wheels-car-rental-system/';
-        } else {
-            // PHP built-in server
-            $base = $protocol . '://' . $host . '/';
-        }
-        
-        $path = ltrim($path, '/');
-        return rtrim($base, '/') . '/' . $path;
+        $base = $protocol . '://' . $host . '/' . $project_folder;
+        return rtrim($base, '/') . '/' . ltrim($path, '/');
     }
 }
 
-// ADDED: This line was in your original but missing in some versions
 include __DIR__ . '/src/includes/header.php';
 
 try {
@@ -50,7 +33,7 @@ try {
     error_log("Database error: " . $e->getMessage());
 }
 
-// Clean vehicle name (remove duplicate make) - FIXED: Function was missing in some versions
+// Clean vehicle name (remove duplicate make)
 function getCleanVehicleName($make, $model) {
     if (strpos(strtolower($model), strtolower($make)) !== false) {
         return $model;
@@ -200,7 +183,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top custom-navbar">
   <div class="container">
     <!-- Brand with enhanced styling -->
-    <a class="navbar-brand fw-bold brand-logo" href="<?= base_url('index.php') ?>">
+    <a class="navbar-brand fw-bold brand-logo" href="/speedy-wheels-car-rental-system/'index.php'">
       <i class="fas fa-car me-2"></i>Speedy Wheels
     </a>
     
@@ -212,12 +195,12 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
       <ul class="navbar-nav ms-auto">
         <!-- Main Navigation Links -->
         <li class="nav-item">
-          <a class="nav-link nav-item-custom <?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : '' ?>" href="<?= base_url('index.php') ?>">
+          <a class="nav-link nav-item-custom <?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : '' ?>" href="/speedy-wheels-car-rental-system/'index.php'">
             <i class="fas fa-home me-1"></i>Home
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link nav-item-custom <?= basename($_SERVER['PHP_SELF']) == 'about.php' ? 'active' : '' ?>" href="<?= base_url('about.php') ?>">
+          <a class="nav-link nav-item-custom <?= basename($_SERVER['PHP_SELF']) == 'about.php' ? 'active' : '' ?>" href="/speedy-wheels-car-rental-system/'about.php'">
             <i class="fas fa-info-circle me-1"></i>About Us
           </a>
         </li>
@@ -227,7 +210,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link nav-item-custom <?= basename($_SERVER['PHP_SELF']) == 'contact.php' ? 'active' : '' ?>" href="<?= base_url('contact.php') ?>">
+          <a class="nav-link nav-item-custom <?= basename($_SERVER['PHP_SELF']) == 'contact.php' ? 'active' : '' ?>" href="/speedy-wheels-car-rental-system/'contact.php'">
             <i class="fas fa-phone me-1"></i>Contact
           </a>
         </li>
@@ -239,26 +222,26 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
               <i class="fas fa-crown me-1"></i>Admin Panel
             </a>
             <ul class="dropdown-menu admin-dropdown-menu">
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/vehicles/index.php') ?>">
+              <li><a class="dropdown-item" href="/speedy-wheels-car-rental-system/'src/modules/vehicles/index.php'">
                 <i class="fas fa-car text-primary me-2"></i>Manage Vehicles
               </a></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/bookings/index.php') ?>">
+              <li><a class="dropdown-item" href="/speedy-wheels-car-rental-system/'src/modules/bookings/index.php'">
                 <i class="fas fa-calendar-check text-success me-2"></i>Manage Bookings
               </a></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/customers/index.php') ?>">
+              <li><a class="dropdown-item" href="/speedy-wheels-car-rental-system/'src/modules/customers/index.php'">
                 <i class="fas fa-users text-info me-2"></i>Manage Customers
               </a></li>
-              <li><a class="dropdown-item" href="<?= base_url('payment.php') ?>">
+              <li><a class="dropdown-item" href="/speedy-wheels-car-rental-system/'payment.php'">
                 <i class="fas fa-file-invoice-dollar text-warning me-2"></i>Payment History
               </a></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/reports/index.php') ?>">
+              <li><a class="dropdown-item" href="/speedy-wheels-car-rental-system/'src/modules/reports/index.php'">
                 <i class="fas fa-chart-line text-danger me-2"></i>Reports
               </a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/chauffeur/index.php') ?>">
+              <li><a class="dropdown-item" href="/speedy-wheels-car-rental-system/'src/modules/auth/dashboard.php'">
+              <li><a class="dropdown-item" href="/speedy-wheels-car-rental-system/'src/modules/chauffeur/index.php'">
                 <i class="fas fa-user-tie text-brown me-2"></i>Manage Chauffeur
               </a></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/auth/dashboard.php') ?>">
                 <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
               </a></li>
             </ul>
@@ -268,7 +251,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
         <!-- USER AUTH LINKS -->
         <?php if (!$is_logged_in): ?>
           <li class="nav-item ms-2">
-            <a class="btn btn-gradient-primary signin-btn" href="<?= base_url('src/modules/auth/login.php') ?>">
+            <a class="btn btn-gradient-primary signin-btn" href="/speedy-wheels-car-rental-system/'src/modules/auth/login.php'">
               <i class="fas fa-user me-1"></i>Sign In
             </a>
           </li>
@@ -278,14 +261,14 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
               <i class="fas fa-user-circle me-1"></i><?= htmlspecialchars($_SESSION['username'] ?? 'User') ?>
             </a>
             <ul class="dropdown-menu user-dropdown-menu">
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/auth/dashboard.php') ?>">
+              <li><a class="dropdown-item" href="/speedy-wheels-car-rental-system/'src/modules/auth/dashboard.php'">
                 <i class="fas fa-tachometer-alt me-2"></i>Dashboard
               </a></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/bookings/create_booking.php') ?>">
+              <li><a class="dropdown-item" href="/speedy-wheels-car-rental-system/'src/modules/bookings/create_booking.php'">
                 <i class="fas fa-plus me-2"></i>New Booking
               </a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="<?= base_url('src/modules/auth/logout.php') ?>">
+              <li><a class="dropdown-item" href="/speedy-wheels-car-rental-system/'src/modules/auth/logout.php'">
                 <i class="fas fa-sign-out-alt me-2"></i>Logout
               </a></li>
             </ul>
@@ -299,7 +282,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
 <!-- HERO SECTION WITH CAR BACKGROUND -->
 <section id="home" class="hero-section" style="
     background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
-                url('<?= base_url('src/assets/images/hero-car.png') ?>');
+                url('/speedy-wheels-car-rental-system/'src/assets/images/hero-car.png'');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -320,12 +303,12 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
           <a href="#our-fleet" class="btn btn-light btn-lg me-3 px-4">
             <i class="fas fa-car me-2"></i>View Vehicles
           </a>
-          <a href="<?= base_url('src/modules/bookings/create_booking.php') ?>" class="btn btn-primary btn-lg px-4 me-3">
+          <a href="/speedy-wheels-car-rental-system/'src/modules/bookings/create_booking.php'" class="btn btn-primary btn-lg px-4 me-3">
             <i class="fas fa-calendar-check me-2"></i>Book Now
           </a>
-          <a href="<?= base_url('chauffeur.php') ?>" class="btn btn-gradient-chauffeur btn-lg px-4">
-            <i class="fas fa-user-tie me-2"></i>Hire Chauffeur
-          </a>
+      <a href="/speedy-wheels-car-rental-system/"chauffeur.php"" class="btn btn-gradient-chauffeur btn-lg px-4">
+        <i class="fas fa-user-tie me-2"></i>Hire Chauffeur
+      </a>
         </div>
       </div>
     </div>
@@ -384,7 +367,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
                      class="w-100 h-100 vehicle-image" 
                      style="object-fit:cover;"
                      alt="<?= htmlspecialchars($vehicle_name) ?>"
-                     onerror="this.onerror=null; this.src='<?= base_url('src/assets/images/vehicles/default-vehicle.jpg') ?>';"
+                     onerror="this.onerror=null; this.src='/speedy-wheels-car-rental-system/'src/assets/images/vehicles/default-vehicle.jpg'';"
                      data-make="<?= htmlspecialchars($vehicle['make']) ?>"
                      data-model="<?= htmlspecialchars($vehicle['model']) ?>"
                      data-filename="<?= htmlspecialchars($image_filename) ?>">
@@ -425,7 +408,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
                 
                 <div class="d-flex justify-content-between align-items-center">
                   <?php if ($vehicle['status'] == 'available'): ?>
-                    <a href="<?= base_url('src/modules/bookings/create_booking.php?vehicle_id=' . $vehicle['vehicle_id']) ?>" class="btn btn-primary btn-sm">
+                    <a href="/speedy-wheels-car-rental-system/'src/modules/bookings/create_booking.php?vehicle_id=' . $vehicle['vehicle_id']" class="btn btn-primary btn-sm">
                       Book Now
                     </a>
                   <?php else: ?>
@@ -499,7 +482,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
             <i class="fas fa-car fa-3x text-primary mb-3"></i>
             <h5>Manage Vehicles</h5>
             <p class="text-muted small">Add, edit, or remove vehicles from fleet</p>
-            <a href="<?= base_url('src/modules/vehicles/index.php') ?>" class="btn btn-primary btn-sm">Go to Vehicles</a>
+            <a href="/speedy-wheels-car-rental-system/'src/modules/vehicles/index.php'" class="btn btn-primary btn-sm">Go to Vehicles</a>
           </div>
         </div>
       </div>
@@ -509,7 +492,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
             <i class="fas fa-calendar-check fa-3x text-success mb-3"></i>
             <h5>Manage Bookings</h5>
             <p class="text-muted small">View and manage all bookings</p>
-            <a href="<?= base_url('src/modules/bookings/index.php') ?>" class="btn btn-success btn-sm">Go to Bookings</a>
+            <a href="/speedy-wheels-car-rental-system/'src/modules/bookings/index.php'" class="btn btn-success btn-sm">Go to Bookings</a>
           </div>
         </div>
       </div>
@@ -519,7 +502,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
             <i class="fas fa-users fa-3x text-info mb-3"></i>
             <h5>Manage Customers</h5>
             <p class="text-muted small">View and manage customer records</p>
-            <a href="<?= base_url('src/modules/customers/index.php') ?>" class="btn btn-info btn-sm">Go to Customers</a>
+            <a href="/speedy-wheels-car-rental-system/'src/modules/customers/index.php'" class="btn btn-info btn-sm">Go to Customers</a>
           </div>
         </div>
       </div>
@@ -529,7 +512,7 @@ $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
             <i class="fas fa-file-invoice-dollar fa-3x text-warning mb-3"></i>
             <h5>Payment History</h5>
             <p class="text-muted small">View payment transactions</p>
-            <a href="<?= base_url('payment.php') ?>" class="btn btn-warning btn-sm">View Payments</a>
+            <a href="/speedy-wheels-car-rental-system/'payment.php'" class="btn btn-warning btn-sm">View Payments</a>
           </div>
         </div>
       </div>
@@ -736,6 +719,7 @@ html {
 .badge-chauffeur {
   background: linear-gradient(45deg, #8B4513, #D2691E);
   color: white;
+}
 }
 
 /* Step numbers */

@@ -20,9 +20,9 @@ if (file_exists($config_path)) {
             // For PHP built-in server
             $script_dir = dirname($_SERVER['SCRIPT_NAME']);
             if ($script_dir === '/' || $script_dir === '\\') {
-                return $protocol . $host . '/' . ltrim($path, '/');
+                return $protocol . '://' . $host . '/' . ltrim($path, '/');
             } else {
-                return $protocol . $host . $script_dir . '/' . ltrim($path, '/');
+                return $protocol . '://' . $host . $script_dir . '/' . ltrim($path, '/');
             }
         }
     }
@@ -68,12 +68,12 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Custom CSS - USING ABSOLUTE PATHS -->
-    <link href="/speedy-wheels-car-rental-system/src/assets/css/main.css" rel="stylesheet">
-    <link href="/speedy-wheels-car-rental-system/src/assets/css/components/auth.css" rel="stylesheet">
-    <link href="/speedy-wheels-car-rental-system/src/assets/css/components/buttons.css" rel="stylesheet">
-    <link href="/speedy-wheels-car-rental-system/src/assets/css/components/cards.css" rel="stylesheet">
-    <link href="/speedy-wheels-car-rental-system/src/assets/css/components/forms.css" rel="stylesheet">
-    <link href="/speedy-wheels-car-rental-system/src/assets/css/components/tables.css" rel="stylesheet">
+    <link href="/src/assets/css/main.css" rel="stylesheet">
+    <link href="/src/assets/css/components/auth.css" rel="stylesheet">
+    <link href="/src/assets/css/components/buttons.css" rel="stylesheet">
+    <link href="/src/assets/css/components/cards.css" rel="stylesheet">
+    <link href="/src/assets/css/components/forms.css" rel="stylesheet">
+    <link href="/src/assets/css/components/tables.css" rel="stylesheet">
 
     <!-- Inline CSS for immediate styling -->
     <style>
@@ -123,7 +123,7 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
 <!-- SIMPLIFIED NAVBAR FOR NOW -->
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top custom-navbar">
     <div class="container">
-        <a class="navbar-brand brand-logo" href="/speedy-wheels-car-rental-system/">
+        <a class="navbar-brand brand-logo" href="/">
             <i class="fas fa-car me-2"></i>Speedy Wheels
         </a>
 
@@ -134,32 +134,32 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" href="/speedy-wheels-car-rental-system/">
+                    <a class="nav-link active" href="/">
                         <i class="fas fa-home me-1"></i> Home
                     </a>
                 </li>
                 
                 <li class="nav-item">
-                    <a class="nav-link" href="/speedy-wheels-car-rental-system/about.php">
+                    <a class="nav-link" href="/about.php">
                         <i class="fas fa-info-circle me-1"></i> About
                     </a>
                 </li>
                 
                 <li class="nav-item">
-                    <a class="nav-link" href="/speedy-wheels-car-rental-system/contact.php">
+                    <a class="nav-link" href="/contact.php">
                         <i class="fas fa-phone me-1"></i> Contact
                     </a>
                 </li>
                 
                 <?php if (!$is_logged_in): ?>
                     <li class="nav-item ms-2">
-                        <a class="btn btn-success" href="/speedy-wheels-car-rental-system/src/modules/auth/login.php">
+                        <a class="btn btn-success" href="/src/modules/auth/login.php">
                             <i class="fas fa-user me-1"></i> Sign In
                         </a>
                     </li>
                 <?php else: ?>
                     <li class="nav-item ms-2">
-                        <a class="btn btn-primary" href="/speedy-wheels-car-rental-system/src/modules/auth/dashboard.php">
+                        <a class="btn btn-primary" href="/src/modules/auth/dashboard.php">
                             <i class="fas fa-user-circle me-1"></i> Dashboard
                         </a>
                     </li>

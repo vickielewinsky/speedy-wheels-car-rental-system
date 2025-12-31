@@ -674,11 +674,11 @@ include __DIR__ . '/../../includes/header.php';
                                         <button class="btn btn-sm btn-outline-primary view-booking" data-id="<?php echo $b['booking_id']; ?>">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        <a href="<?php echo base_url('src/modules/auth/get_receipt.php?booking_id=' . $b['booking_id']); ?>" class="btn btn-sm btn-outline-success" target="_blank">
+                                        <a href="/'src/modules/auth/get_receipt.php?booking_id=' . $b['booking_id']" class="btn btn-sm btn-outline-success" target="_blank">
                                             <i class="fas fa-receipt"></i>
                                         </a>
                                         <?php if ($is_admin): ?>
-                                            <a href="<?php echo base_url('src/modules/bookings/index.php?edit=' . $b['booking_id']); ?>" class="btn btn-sm btn-outline-warning">
+                                            <a href="/'src/modules/bookings/index.php?edit=' . $b['booking_id']" class="btn btn-sm btn-outline-warning">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         <?php endif; ?>
@@ -802,7 +802,7 @@ document.querySelectorAll('.view-booking').forEach(button => {
 document.querySelectorAll('.view-user').forEach(button => {
     button.addEventListener('click', function() {
         const userId = this.getAttribute('data-id');
-        fetch('<?php echo base_url("src/modules/auth/get_user_details.php"); ?>?id=' + userId)
+        fetch('/"src/modules/auth/get_user_details.php"?id=' + userId)
             .then(response => response.text())
             .then(data => {
                 document.getElementById('userDetails').innerHTML = data;

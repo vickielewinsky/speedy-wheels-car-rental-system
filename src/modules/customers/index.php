@@ -1,6 +1,8 @@
 <?php
 // src/modules/customers/index.php - ADD BACK TO DASHBOARD BUTTON
 require_once "../../config/database.php";
+require_once __DIR__ . "/../../helpers/url_helper.php";
+require_once __DIR__ . "/../../helpers/url_helper.php";
 require_once "../../includes/auth.php";
 
 // Require authentication and admin role

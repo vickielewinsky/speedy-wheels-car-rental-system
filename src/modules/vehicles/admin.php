@@ -1,6 +1,7 @@
 <?php
 // src/modules/vehicles/admin.php - ADMIN ONLY VERSION
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . "/../../helpers/url_helper.php";
 require_once __DIR__ . '/../../includes/auth.php';
 
 // Require admin role

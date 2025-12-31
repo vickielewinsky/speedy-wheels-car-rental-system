@@ -1,6 +1,7 @@
 <?php
 // src/modules/reports/index.php - ADD BACK TO DASHBOARD BUTTON
 require_once "../../config/database.php";
+require_once "../../helpers/url_helper.php";
 require_once "../../includes/auth.php";
 
 // Require authentication and admin role
