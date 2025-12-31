@@ -1,0 +1,44 @@
+--- index.php	2024-12-31 10:00:00
++++ index.php	2024-12-31 10:01:00
+@@ -244,10 +244,11 @@
+         </p>
+         <div class="hero-buttons">
+           <a href="#our-fleet" class="btn btn-light btn-lg me-3 px-4">
+             <i class="fas fa-car me-2"></i>View Vehicles
+           </a>
+-          <a href="<?= base_url('src/modules/bookings/create_booking.php') ?>" class="btn btn-primary btn-lg px-4">
++          <a href="<?= base_url('src/modules/bookings/create_booking.php') ?>" class="btn btn-primary btn-lg px-4 me-3">
+             <i class="fas fa-calendar-check me-2"></i>Book Now
+           </a>
++          <a href="<?= base_url('chauffeur.php') ?>" class="btn btn-gradient-chauffeur btn-lg px-4">
++            <i class="fas fa-user-tie me-2"></i>Hire Chauffeur
++          </a>
+         </div>
+       </div>
+     </div>
+@@ -419,10 +420,31 @@
+   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+ }
+
++.btn-gradient-chauffeur {
++  background: linear-gradient(45deg, #8B4513, #D2691E) !important;
++  border: none !important;
++  color: white !important;
++  transition: all 0.3s ease !important;
++}
++
++.btn-gradient-chauffeur:hover {
++  background: linear-gradient(45deg, #A0522D, #CD853F) !important;
++  transform: translateY(-2px) !important;
++  box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4) !important;
++}
++
++.badge-chauffeur {
++  background: linear-gradient(45deg, #8B4513, #D2691E);
++  color: white;
++}
++
+ /* Smooth scrolling */
+ html {
+   scroll-behavior: smooth;
+ }
