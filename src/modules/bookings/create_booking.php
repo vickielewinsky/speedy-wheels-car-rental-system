@@ -2,7 +2,30 @@
 // src/modules/bookings/create_booking.php
 $page_title = "Create New Booking - Speedy Wheels";
 
-// Include the shared header
+// Check if user is logged in (without starting session)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role'])) {
+    // Include config first to get base_url function
+    $root_dir = dirname(__DIR__, 2);
+    $config_path = $root_dir . '/config/database.php';
+    if (file_exists($config_path)) {
+        require_once $config_path;
+    }
+    
+    // Include url helper for base_url function
+    $helper_path = $root_dir . '/helpers/url_helper.php';
+    if (file_exists($helper_path)) {
+        require_once $helper_path;
+    }
+    
+    header('Location: ' . base_url('src/modules/auth/login.php'));
+    exit();
+}
+
+// Include the shared header AFTER session check
 require_once dirname(__DIR__, 2) . '/includes/header.php';
 
 // Load database configuration
@@ -16,6 +39,31 @@ if (file_exists($db_config_path)) {
 try {
     $pdo = getDatabaseConnection();
 
+    // Get current user information
+    $user_id = $_SESSION['user_id'];
+    $user_role = $_SESSION['user_role'];
+    
+    // Fetch user details
+    $user_stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+    $user_stmt->execute([$user_id]);
+    $current_user = $user_stmt->fetch();
+    
+    if (!$current_user) {
+        // User not found in database
+        session_destroy();
+        header('Location: ' . base_url('src/modules/auth/login.php'));
+        exit();
+    }
+    
+    // Fetch customer details if user is linked to a customer
+    $customer_stmt = $pdo->prepare("SELECT * FROM customers WHERE user_id = ?");
+    $customer_stmt->execute([$user_id]);
+    $current_customer = $customer_stmt->fetch();
+    
+    // If user doesn't have a customer record, we'll handle it in the form
+    // but we won't auto-create it here to avoid errors
+
+    // Fetch available vehicles
     $vehicles_stmt = $pdo->query("SELECT 
         vehicle_id, 
         plate_no,
@@ -28,22 +76,10 @@ try {
         FROM vehicles WHERE status = 'available'");
     $vehicles = $vehicles_stmt->fetchAll();
 
-    // Fetch customers - using correct column names from your schema
-    $customers_stmt = $pdo->query("SELECT 
-        customer_id,
-        name,
-        email,
-        phone,
-        id_number,
-        dl_number,
-        address
-        FROM customers");
-    $customers = $customers_stmt->fetchAll();
-
 } catch (PDOException $e) {
     $vehicles = [];
-    $customers = [];
-    // Log error for debugging
+    $current_user = [];
+    $current_customer = [];
     error_log("Database error in create_booking.php: " . $e->getMessage());
 }
 ?>
@@ -65,6 +101,13 @@ try {
             </div>
         </div>
 
+        <!-- Welcome Message -->
+        <div class="alert alert-info mb-4">
+            <i class="fas fa-user-circle me-2"></i>
+            <strong>Welcome, <?php echo htmlspecialchars($current_user['first_name'] . ' ' . $current_user['last_name']); ?>!</strong>
+            You are booking as a registered user.
+        </div>
+
         <!-- Booking Form -->
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white py-3">
@@ -74,93 +117,65 @@ try {
             </div>
             <div class="card-body booking-form-container">
                 <form action="process_booking.php" method="POST" id="bookingForm">
+                    <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
+                    
                     <div class="row">
-                        <!-- Customer Information -->
+                        <!-- Customer Information (Auto-filled for logged-in user) -->
                         <div class="col-md-6">
                             <h6 class="form-section-header">
-                                <i class="fas fa-user me-2"></i>Customer Information
+                                <i class="fas fa-user me-2"></i>Your Information
                             </h6>
 
-                            <!-- Customer Selection Tabs -->
-                            <ul class="nav nav-pills mb-3 customer-tabs" id="customerTab" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="existing-customer-tab" data-bs-toggle="pill" 
-                                            data-bs-target="#existing-customer" type="button" role="tab">
-                                        <i class="fas fa-users me-1"></i>Select Existing Customer
-                                    </button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="new-customer-tab" data-bs-toggle="pill" 
-                                            data-bs-target="#new-customer" type="button" role="tab">
-                                        <i class="fas fa-user-plus me-1"></i>Create New Customer
-                                    </button>
-                                </li>
-                            </ul>
-
-                            <div class="tab-content" id="customerTabContent">
-                                <!-- Existing Customer Tab -->
-                                <div class="tab-pane fade show active" id="existing-customer" role="tabpanel">
-                                    <div class="mb-3">
-                                        <label for="customer_id" class="form-label">Select Customer *</label>
-                                        <select class="form-select" id="customer_id" name="customer_id">
-                                            <option value="">Choose a customer...</option>
-                                            <?php foreach ($customers as $customer): ?>
-                                                <option value="<?php echo $customer['customer_id']; ?>" 
-                                                        data-name="<?php echo htmlspecialchars($customer['name']); ?>"
-                                                        data-phone="<?php echo htmlspecialchars($customer['phone']); ?>"
-                                                        data-email="<?php echo htmlspecialchars($customer['email']); ?>"
-                                                        data-id-number="<?php echo htmlspecialchars($customer['id_number']); ?>"
-                                                        data-dl-number="<?php echo htmlspecialchars($customer['dl_number']); ?>"
-                                                        data-address="<?php echo htmlspecialchars($customer['address']); ?>">
-                                                    <?php echo htmlspecialchars($customer['name']); ?> 
-                                                    (<?php echo htmlspecialchars($customer['phone']); ?>)
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <div id="existingCustomerDetails" class="customer-details-panel p-3 rounded small" style="display: none;">
-                                        <h6>Customer Details:</h6>
-                                        <div id="customerDetailsContent"></div>
-                                    </div>
-                                </div>
-
-                                <!-- New Customer Tab -->
-                                <div class="tab-pane fade" id="new-customer" role="tabpanel">
-                                    <div class="mb-3">
-                                        <label class="form-label">New Customer Details *</label>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-2">
-                                                <input type="text" class="form-control new-customer-field" name="customer_name" 
-                                                       placeholder="Full Name">
-                                            </div>
-                                            <div class="col-md-6 mb-2">
-                                                <input type="tel" class="form-control new-customer-field" name="customer_phone" 
-                                                       placeholder="Phone Number">
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-2">
-                                                <input type="text" class="form-control new-customer-field" name="customer_id_number" 
-                                                       placeholder="ID Number">
-                                            </div>
-                                            <div class="col-md-6 mb-2">
-                                                <input type="text" class="form-control new-customer-field" name="customer_dl_number" 
-                                                       placeholder="Driving License Number">
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-2">
-                                                <input type="email" class="form-control new-customer-field" name="customer_email" 
-                                                       placeholder="Email (Optional)">
-                                            </div>
-                                            <div class="col-md-6 mb-2">
-                                                <input type="text" class="form-control new-customer-field" name="customer_address" 
-                                                       placeholder="Address (Optional)">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="customer-details-panel p-3 rounded mb-3 bg-light">
+                                <h6>Account Information:</h6>
+                                <p><strong>Name:</strong> <?php echo htmlspecialchars($current_user['first_name'] . ' ' . $current_user['last_name']); ?></p>
+                                <p><strong>Email:</strong> <?php echo htmlspecialchars($current_user['email']); ?></p>
+                                <p><strong>Phone:</strong> <?php echo htmlspecialchars($current_user['phone'] ?? 'Not provided'); ?></p>
+                                
+                                <?php if ($current_customer): ?>
+                                    <hr>
+                                    <h6>Customer Profile:</h6>
+                                    <p><strong>Customer ID:</strong> <?php echo htmlspecialchars($current_customer['customer_id']); ?></p>
+                                    <p><strong>ID Number:</strong> <?php echo htmlspecialchars($current_customer['id_number']); ?></p>
+                                    <p><strong>DL Number:</strong> <?php echo htmlspecialchars($current_customer['dl_number']); ?></p>
+                                    <input type="hidden" name="customer_id" value="<?php echo $current_customer['customer_id']; ?>">
+                                <?php endif; ?>
                             </div>
+
+                            <!-- Profile completion form (only show if missing customer record) -->
+                            <?php if (!$current_customer): ?>
+                            <div class="mt-3">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <strong>Profile Incomplete</strong><br>
+                                    Please provide the following details to complete your customer profile:
+                                </div>
+                                
+                                <h6 class="form-section-header">
+                                    <i class="fas fa-id-card me-2"></i>Complete Your Profile
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label">ID Number *</label>
+                                        <input type="text" class="form-control" name="id_number" 
+                                               placeholder="Enter your ID number" required>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label">Driving License Number *</label>
+                                        <input type="text" class="form-control" name="dl_number" 
+                                               placeholder="Enter your DL number" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-2">
+                                        <label class="form-label">Address</label>
+                                        <input type="text" class="form-control" name="address" 
+                                               placeholder="Your address">
+                                    </div>
+                                </div>
+                                <input type="hidden" name="create_customer" value="1">
+                            </div>
+                            <?php endif; ?>
                         </div>
 
                         <!-- Vehicle Selection -->
@@ -182,6 +197,12 @@ try {
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
+                                <?php if (empty($vehicles)): ?>
+                                    <div class="alert alert-warning mt-2">
+                                        <i class="fas fa-exclamation-circle me-1"></i>
+                                        No vehicles available at the moment. Please check back later.
+                                    </div>
+                                <?php endif; ?>
                             </div>
 
                             <div class="mb-3">
@@ -264,6 +285,7 @@ try {
                                     <span>Total Amount:</span>
                                     <span id="totalAmount" class="total-amount">KSh 0.00</span>
                                 </div>
+                                <input type="hidden" name="total_amount" id="totalAmountHidden" value="0">
                             </div>
 
                             <!-- Insurance Options -->
@@ -281,6 +303,25 @@ try {
                                            id="premium_insurance" value="premium">
                                     <label class="form-check-label" for="premium_insurance">
                                         Premium Insurance (+KSh 500/day) - Comprehensive coverage
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Payment Method -->
+                            <div class="mb-3">
+                                <label class="form-label">Payment Method</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" 
+                                           id="pay_now" value="mpesa" checked>
+                                    <label class="form-check-label" for="pay_now">
+                                        <i class="fas fa-mobile-alt me-1"></i> Pay Now via MPESA
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" 
+                                           id="pay_later" value="later">
+                                    <label class="form-check-label" for="pay_later">
+                                        <i class="fas fa-clock me-1"></i> Pay at Pickup
                                     </label>
                                 </div>
                             </div>
@@ -302,6 +343,18 @@ try {
                         </div>
                     </div>
 
+                    <!-- Terms and Conditions -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                                <label class="form-check-label" for="terms">
+                                    I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a> *
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Submit Button -->
                     <div class="row mt-4">
                         <div class="col-12">
@@ -309,13 +362,38 @@ try {
                                 <button type="reset" class="btn btn-outline-secondary me-md-2" onclick="resetForm()">
                                     <i class="fas fa-redo me-1"></i> Reset Form
                                 </button>
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary" id="submitBtn" <?php echo empty($vehicles) ? 'disabled' : ''; ?>>
                                     <i class="fas fa-check me-1"></i> Create Booking
                                 </button>
                             </div>
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Speedy Wheels Car Rental Terms</h6>
+                <p>1. The renter must be at least 21 years old and possess a valid driving license.</p>
+                <p>2. A security deposit may be required.</p>
+                <p>3. The vehicle must be returned in the same condition as rented.</p>
+                <p>4. Fuel is not included in the rental price.</p>
+                <p>5. Late returns will incur additional charges.</p>
+                <p>6. The renter is responsible for any traffic violations during the rental period.</p>
+                <p>7. Insurance coverage is as per the selected option.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -329,59 +407,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const dailyRateSpan = document.getElementById('dailyRate');
     const numberOfDaysSpan = document.getElementById('numberOfDays');
     const totalAmountSpan = document.getElementById('totalAmount');
+    const totalAmountHidden = document.getElementById('totalAmountHidden');
     const vehicleDetailsDiv = document.getElementById('vehicleDetails');
     const rentalDurationDiv = document.getElementById('rentalDuration');
     const insuranceRadios = document.querySelectorAll('input[name="insurance_option"]');
-    const customerSelect = document.getElementById('customer_id');
-    const existingCustomerDetails = document.getElementById('existingCustomerDetails');
-    const customerDetailsContent = document.getElementById('customerDetailsContent');
-    const newCustomerFields = document.querySelectorAll('.new-customer-field');
+    const submitBtn = document.getElementById('submitBtn');
 
-    // Customer tab functionality
-    const customerTab = new bootstrap.Tab(document.getElementById('existing-customer-tab'));
-
-    customerSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-
-        if (selectedOption.value) {
-            const name = selectedOption.getAttribute('data-name');
-            const phone = selectedOption.getAttribute('data-phone');
-            const email = selectedOption.getAttribute('data-email');
-            const idNumber = selectedOption.getAttribute('data-id-number');
-            const dlNumber = selectedOption.getAttribute('data-dl-number');
-            const address = selectedOption.getAttribute('data-address');
-
-            customerDetailsContent.innerHTML = `
-                <p><strong>Name:</strong> ${name}</p>
-                <p><strong>Phone:</strong> ${phone}</p>
-                <p><strong>Email:</strong> ${email || 'Not provided'}</p>
-                <p><strong>ID Number:</strong> ${idNumber}</p>
-                <p><strong>DL Number:</strong> ${dlNumber}</p>
-                <p><strong>Address:</strong> ${address || 'Not provided'}</p>
-            `;
-            existingCustomerDetails.style.display = 'block';
-
-            // Switch to existing customer tab
-            document.getElementById('existing-customer-tab').click();
-
-            // Clear new customer fields
-            newCustomerFields.forEach(field => field.value = '');
-        } else {
-            existingCustomerDetails.style.display = 'none';
-        }
-    });
-
-    // Clear existing customer selection when new customer tab is active
-    document.getElementById('new-customer-tab').addEventListener('click', function() {
-        customerSelect.value = '';
-        existingCustomerDetails.style.display = 'none';
-    });
-
-    // Clear new customer fields when existing customer tab is active
-    document.getElementById('existing-customer-tab').addEventListener('click', function() {
-        newCustomerFields.forEach(field => field.value = '');
-    });
-
+    // Vehicle selection handler
     vehicleSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         const dailyRate = selectedOption.getAttribute('data-daily-rate');
@@ -437,17 +469,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const total = (dailyRate * days) + insuranceCost;
 
         totalAmountSpan.textContent = 'KSh ' + total.toLocaleString('en-KE', {minimumFractionDigits: 2});
+        totalAmountHidden.value = total;
     }
 
     // Form validation
     document.getElementById('bookingForm').addEventListener('submit', function(e) {
         const startDate = new Date(startDateInput.value);
         const endDate = new Date(endDateInput.value);
-        const customerId = document.getElementById('customer_id').value;
-        const customerName = document.querySelector('input[name="customer_name"]').value;
-        const activeTab = document.querySelector('#customerTab .nav-link.active').id;
 
         // Validate rental dates
+        if (!startDateInput.value || !endDateInput.value) {
+            e.preventDefault();
+            alert('Please select both start and end dates.');
+            return false;
+        }
+
         if (endDate <= startDate) {
             e.preventDefault();
             alert('End date must be after start date.');
@@ -461,22 +497,23 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
 
-        // Validate customer information based on active tab
-        if (activeTab === 'existing-customer-tab') {
-            if (!customerId) {
+        // Check if user needs to complete profile
+        const idNumberInput = document.querySelector('input[name="id_number"]');
+        const dlNumberInput = document.querySelector('input[name="dl_number"]');
+        
+        if (idNumberInput && dlNumberInput) {
+            if (!idNumberInput.value.trim() || !dlNumberInput.value.trim()) {
                 e.preventDefault();
-                alert('Please select an existing customer.');
+                alert('Please provide both ID Number and Driving License Number to complete your profile.');
                 return false;
             }
-        } else {
-            // New customer tab
-            if (!customerName || !document.querySelector('input[name="customer_phone"]').value || 
-                !document.querySelector('input[name="customer_id_number"]').value || 
-                !document.querySelector('input[name="customer_dl_number"]').value) {
-                e.preventDefault();
-                alert('Please fill all required customer details (Name, Phone, ID Number, and Driving License).');
-                return false;
-            }
+        }
+
+        // Check terms and conditions
+        if (!document.getElementById('terms').checked) {
+            e.preventDefault();
+            alert('You must agree to the Terms and Conditions.');
+            return false;
         }
     });
 
@@ -491,10 +528,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Reset form function
     window.resetForm = function() {
-        customerSelect.value = '';
-        existingCustomerDetails.style.display = 'none';
-        newCustomerFields.forEach(field => field.value = '');
-        document.getElementById('existing-customer-tab').click();
+        vehicleSelect.value = '';
+        startDateInput.value = '';
+        endDateInput.value = '';
+        document.getElementById('vehicleDetails').textContent = 'Select a vehicle to see details';
+        document.getElementById('rentalDuration').textContent = 'Select dates to calculate duration';
+        dailyRateSpan.textContent = 'KSh 0.00';
+        numberOfDaysSpan.textContent = '0';
+        totalAmountSpan.textContent = 'KSh 0.00';
+        totalAmountHidden.value = '0';
+        document.getElementById('basic_insurance').checked = true;
+        document.getElementById('pay_now').checked = true;
+        document.getElementById('special_requests').value = '';
+        document.getElementById('terms').checked = false;
+        
+        // Reset profile completion fields if they exist
+        const idNumberInput = document.querySelector('input[name="id_number"]');
+        const dlNumberInput = document.querySelector('input[name="dl_number"]');
+        const addressInput = document.querySelector('input[name="address"]');
+        
+        if (idNumberInput) idNumberInput.value = '';
+        if (dlNumberInput) dlNumberInput.value = '';
+        if (addressInput) addressInput.value = '';
     };
 });
 </script>

@@ -1,5 +1,6 @@
 <?php
-// src/modules/auth/register.php - MODIFIED VERSION
+// Speedy Wheels Car Rental System
+// src/modules/auth/register.php - FIXED VERSION
 
 // Start session FIRST
 if (session_status() === PHP_SESSION_NONE) {
@@ -12,12 +13,27 @@ error_reporting(E_ALL);
 
 // Check if already logged in
 if (isset($_SESSION['user_id'])) {
-    header("Location: ../index.php");
+    header("Location: dashboard.php");
     exit();
 }
 
 // Include database connection
-require_once "../../config/database.php";
+require_once __DIR__ . '/../../config/database.php';
+
+// Simple base_url function
+function base_url($path = '') {
+    $base = 'http://' . $_SERVER['HTTP_HOST'];
+    $script_dir = dirname($_SERVER['SCRIPT_NAME']);
+    
+    if ($script_dir !== '/') {
+        $base .= $script_dir;
+    }
+    
+    $base = rtrim($base, '/');
+    $path = ltrim($path, '/');
+    
+    return $base . '/' . $path;
+}
 
 function emailExists($pdo, $email) {
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
@@ -25,11 +41,160 @@ function emailExists($pdo, $email) {
     return $stmt->fetch() !== false;
 }
 
-// Function to check if username exists
 function usernameExists($pdo, $username) {
     $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
     $stmt->execute([$username]);
     return $stmt->fetch() !== false;
+}
+
+// FIXED EMAIL SENDING FUNCTION
+function sendRegistrationEmail($email, $name, $username) {
+    try {
+        // Get project root directory (3 levels up from src/modules/auth)
+        $root_dir = dirname(__DIR__, 3);
+        
+        // Load PHPMailer
+        require_once $root_dir . '/vendor/autoload.php';
+        
+        // Load email config
+        require_once $root_dir . '/src/config/email_config.php';
+        
+        // Create PHPMailer instance
+        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+        
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host       = EmailConfig::SMTP_HOST;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = EmailConfig::SMTP_USERNAME;
+        $mail->Password   = EmailConfig::SMTP_PASSWORD;
+        $mail->SMTPSecure = EmailConfig::SMTP_SECURE;
+        $mail->Port       = EmailConfig::SMTP_PORT;
+        
+        // Enable debugging to log file
+        $mail->SMTPDebug = 0; // Set to 2 for debugging
+        $mail->Debugoutput = function($str, $level) {
+            file_put_contents(
+                dirname(__DIR__, 3) . '/logs/email_debug.log',
+                date('Y-m-d H:i:s') . " [$level] $str\n",
+                FILE_APPEND
+            );
+        };
+        
+        // Timeout settings
+        $mail->Timeout = 30;
+        
+        // Sender
+        $mail->setFrom(EmailConfig::FROM_EMAIL, EmailConfig::FROM_NAME);
+        
+        // Recipient
+        $mail->addAddress($email, $name);
+        
+        // Content
+        $mail->isHTML(true);
+        $mail->Subject = 'Account Created Successfully - Speedy Wheels Car Rental';
+        
+        // HTML email body
+        $html_body = '
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
+                .header { background: linear-gradient(135deg, #007bff, #0056b3); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { padding: 30px; background: #f9f9f9; border-radius: 0 0 10px 10px; }
+                .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; border-top: 1px solid #ddd; margin-top: 20px; }
+                .btn { display: inline-block; background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 15px 0; }
+                .details { background: white; padding: 20px; border-radius: 5px; border-left: 4px solid #007bff; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🚗 Speedy Wheels Car Rental</h1>
+                <h2>Welcome to Our Family!</h2>
+            </div>
+            
+            <div class="content">
+                <p>Dear <strong>' . htmlspecialchars($name) . '</strong>,</p>
+                
+                <p>✅ <strong>Congratulations! Your account has been successfully created.</strong></p>
+                
+                <div class="details">
+                    <h3 style="margin-top: 0; color: #007bff;">Your Account Details:</h3>
+                    <p><strong>👤 Username:</strong> ' . htmlspecialchars($username) . '</p>
+                    <p><strong>📧 Email:</strong> ' . htmlspecialchars($email) . '</p>
+                    <p><strong>📅 Account Created:</strong> ' . date('F j, Y') . '</p>
+                    <p><strong>⏰ Time:</strong> ' . date('g:i A') . '</p>
+                </div>
+                
+                <p>You can now access all features of Speedy Wheels:</p>
+                <ul>
+                    <li>🚗 Browse and book available vehicles</li>
+                    <li>📋 Manage your bookings</li>
+                    <li>💳 Make secure payments via MPESA</li>
+                    <li>📊 Track your rental history</li>
+                    <li>🛟 24/7 customer support</li>
+                </ul>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="' . base_url('src/modules/auth/login.php') . '" class="btn">
+                        🔑 Login to Your Account
+                    </a>
+                </div>
+                
+                <p><strong>Need Help?</strong></p>
+                <p>Our support team is here to assist you:</p>
+                <ul>
+                    <li><strong>📞 Phone:</strong> 254712345678</li>
+                    <li><strong>📧 Email:</strong> support@speedywheels.com</li>
+                    <li><strong>🕐 Hours:</strong> Monday - Sunday, 7:00 AM - 10:00 PM</li>
+                </ul>
+                
+                <p style="color: #666; font-size: 12px; border-top: 1px solid #eee; padding-top: 15px; margin-top: 25px;">
+                    <em>This is an automated message. Please do not reply to this email.</em>
+                </p>
+            </div>
+            
+            <div class="footer">
+                <p>Speedy Wheels Car Rental &copy; ' . date('Y') . '</p>
+                <p>Mombasa, Kenya | Making Car Rental Easy & Convenient</p>
+            </div>
+        </body>
+        </html>';
+        
+        $mail->Body = $html_body;
+        
+        // Plain text version
+        $plain_text = "ACCOUNT CREATION SUCCESSFUL - SPEEDY WHEELS CAR RENTAL\n\n";
+        $plain_text .= "Dear " . $name . ",\n\n";
+        $plain_text .= "Congratulations! Your account has been successfully created.\n\n";
+        $plain_text .= "ACCOUNT DETAILS:\n";
+        $plain_text .= "Username: " . $username . "\n";
+        $plain_text .= "Email: " . $email . "\n";
+        $plain_text .= "Account Created: " . date('F j, Y') . " at " . date('g:i A') . "\n\n";
+        $plain_text .= "You can now login to your account and start booking vehicles.\n\n";
+        $plain_text .= "Login URL: " . base_url('src/modules/auth/login.php') . "\n\n";
+        $plain_text .= "Need help? Contact us:\n";
+        $plain_text .= "Phone: 254712345678\n";
+        $plain_text .= "Email: support@speedywheels.com\n\n";
+        $plain_text .= "Speedy Wheels Car Rental © " . date('Y') . "\n";
+        $plain_text .= "This is an automated message. Please do not reply.\n";
+        
+        $mail->AltBody = $plain_text;
+        
+        // Send email
+        if ($mail->send()) {
+            error_log("✅ Registration email sent to: " . $email);
+            return true;
+        } else {
+            error_log("❌ Failed to send registration email to " . $email . ": " . $mail->ErrorInfo);
+            return false;
+        }
+        
+    } catch (Exception $e) {
+        error_log("💥 Email sending error for " . $email . ": " . $e->getMessage());
+        return false;
+    }
 }
 
 // Handle form submission
@@ -75,13 +240,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Proceed with registration
     if (!$error) {
         try {
+            // Start transaction
+            $pdo->beginTransaction();
+            
             // Hash password
             $password_hash = password_hash($user_data['password'], PASSWORD_DEFAULT);
             
             // Insert user
             $stmt = $pdo->prepare("
                 INSERT INTO users (username, email, password_hash, first_name, last_name, phone, user_role, is_active, created_at) 
-                VALUES (?, ?, ?, ?, ?, ?, 'user', 1, NOW())
+                VALUES (?, ?, ?, ?, ?, ?, 'customer', 1, NOW())
             ");
             
             $stmt->execute([
@@ -93,30 +261,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 !empty($user_data['phone']) ? $user_data['phone'] : null
             ]);
             
-            $_SESSION['success_message'] = "Registration successful! You can now login.";
+            $user_id = $pdo->lastInsertId();
+            
+            // Commit transaction
+            $pdo->commit();
+            
+            // Try to send registration confirmation email
+            $full_name = $user_data['first_name'] . ' ' . $user_data['last_name'];
+            $email_sent = sendRegistrationEmail($user_data['email'], $full_name, $user_data['username']);
+            
+            // Store messages in session
+            $_SESSION['success_message'] = "✅ Registration successful! You can now login.";
+            
+            if ($email_sent) {
+                $_SESSION['email_message'] = "📧 A confirmation email has been sent to " . $user_data['email'];
+            } else {
+                $_SESSION['email_message'] = "⚠️ Registration successful, but confirmation email could not be sent.";
+                // Log detailed error
+                error_log("Email failed for user: " . $user_data['email']);
+            }
+            
+            // Redirect to login
             header("Location: login.php");
             exit();
             
         } catch (PDOException $e) {
+            // Rollback on error
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             $error = "Registration failed. Please try again.";
             error_log("Registration error: " . $e->getMessage());
         }
     }
-}
-
-// Simple base_url function
-function base_url($path = '') {
-    $base = 'http://' . $_SERVER['HTTP_HOST'];
-    $script_dir = dirname($_SERVER['SCRIPT_NAME']);
-    
-    if ($script_dir !== '/') {
-        $base .= $script_dir;
-    }
-    
-    $base = rtrim($base, '/');
-    $path = ltrim($path, '/');
-    
-    return $base . '/' . $path;
 }
 
 // Get background image
@@ -128,7 +305,7 @@ $possible_paths = [
 ];
 
 foreach ($possible_paths as $path) {
-    $full_path = __DIR__ . '/../../' . $path;
+    $full_path = dirname(__DIR__, 2) . '/' . $path;
     if (file_exists($full_path)) {
         $image_url = base_url($path);
         break;
@@ -136,7 +313,6 @@ foreach ($possible_paths as $path) {
 }
 ?>
 
-<!-- YOUR EXISTING HTML AND CSS CODE STARTS HERE -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -151,11 +327,6 @@ foreach ($possible_paths as $path) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* ============================================
-           PROFESSIONAL REGISTER FORM
-           Consistent with login design
-        ============================================ */
-        
         :root {
             --primary: #2563eb;
             --primary-hover: #1d4ed8;
@@ -235,7 +406,6 @@ foreach ($possible_paths as $path) {
             animation: fadeIn 0.4s ease-out;
         }
         
-        /* Register Card */
         .register-card {
             background: var(--background);
             border-radius: var(--radius);
@@ -244,7 +414,6 @@ foreach ($possible_paths as $path) {
             border: 1px solid var(--border);
         }
         
-        /* Header */
         .register-header {
             text-align: center;
             margin-bottom: 32px;
@@ -268,7 +437,6 @@ foreach ($possible_paths as $path) {
             color: var(--text-light);
         }
         
-        /* Form Elements */
         .form-group {
             margin-bottom: 20px;
         }
@@ -315,7 +483,6 @@ foreach ($possible_paths as $path) {
             display: block;
         }
         
-        /* Two Column Layout */
         .row {
             display: flex;
             gap: 15px;
@@ -326,7 +493,6 @@ foreach ($possible_paths as $path) {
             flex: 1;
         }
         
-        /* Register Button */
         .register-button {
             width: 100%;
             padding: 14px;
@@ -356,7 +522,6 @@ foreach ($possible_paths as $path) {
             transform: translateY(0);
         }
         
-        /* Login Link */
         .login-section {
             text-align: center;
             padding-top: 24px;
@@ -383,7 +548,6 @@ foreach ($possible_paths as $path) {
             text-decoration: underline;
         }
         
-        /* Error Message */
         .error-message {
             background: #fee2e2;
             border: 1px solid #fecaca;
@@ -402,7 +566,6 @@ foreach ($possible_paths as $path) {
             font-size: 16px;
         }
         
-        /* Success Message */
         .success-message {
             background: #d1fae5;
             border: 1px solid #a7f3d0;
@@ -421,7 +584,24 @@ foreach ($possible_paths as $path) {
             font-size: 16px;
         }
         
-        /* Animations */
+        .email-notice {
+            background: #dbeafe;
+            border: 1px solid #bfdbfe;
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            color: #1d4ed8;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .email-notice i {
+            font-size: 16px;
+        }
+        
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -444,7 +624,6 @@ foreach ($possible_paths as $path) {
             }
         }
         
-        /* Mobile Responsiveness */
         @media (max-width: 576px) {
             body {
                 padding: 16px;
@@ -501,7 +680,7 @@ foreach ($possible_paths as $path) {
                 <i class="fas fa-user-plus"></i>
                 Create Account
             </h1>
-            <p>Register for Speedy Wheels</p>
+            <p>Join Speedy Wheels and start booking vehicles</p>
         </div>
         
         <!-- Error Message -->
@@ -512,22 +691,11 @@ foreach ($possible_paths as $path) {
             </div>
         <?php endif; ?>
         
-        <!-- Success Message -->
-        <?php if ($success): ?>
-            <div class="success-message">
-                <i class="fas fa-check-circle"></i>
-                <span><?php echo htmlspecialchars($success); ?></span>
-            </div>
-        <?php endif; ?>
-        
-        <!-- Success Message from Session -->
-        <?php if (!empty($_SESSION['success_message'])): ?>
-            <div class="success-message">
-                <i class="fas fa-check-circle"></i>
-                <span><?php echo htmlspecialchars($_SESSION['success_message']); ?></span>
-            </div>
-            <?php unset($_SESSION['success_message']); ?>
-        <?php endif; ?>
+        <!-- Email Notice -->
+        <div class="email-notice">
+            <i class="fas fa-envelope"></i>
+            <span>📧 You will receive a confirmation email after registration</span>
+        </div>
         
         <!-- Register Form -->
         <form method="POST" action="<?= htmlspecialchars($_SERVER['PHP_SELF']); ?>" id="registerForm">
@@ -575,7 +743,7 @@ foreach ($possible_paths as $path) {
                     value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" 
                     required
                 >
-                <span class="form-text">Choose a unique username</span>
+                <span class="form-text">This will be your login username</span>
             </div>
             
             <!-- Email -->
@@ -590,6 +758,7 @@ foreach ($possible_paths as $path) {
                     value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" 
                     required
                 >
+                <span class="form-text">We'll send your account confirmation to this email</span>
             </div>
             
             <!-- Phone Number -->
@@ -603,7 +772,7 @@ foreach ($possible_paths as $path) {
                     placeholder="2547XXXXXXXX"
                     value="<?php echo htmlspecialchars($_POST['phone'] ?? ''); ?>"
                 >
-                <span class="form-text">Optional - format: 2547XXXXXXXX</span>
+                <span class="form-text">Optional - Kenyan format: 2547XXXXXXXX</span>
             </div>
             
             <!-- Password -->
@@ -614,7 +783,7 @@ foreach ($possible_paths as $path) {
                     class="form-control" 
                     id="password" 
                     name="password"
-                    placeholder="Create a password"
+                    placeholder="Create a strong password"
                     required
                 >
                 <span class="form-text">Minimum 6 characters</span>
@@ -622,7 +791,7 @@ foreach ($possible_paths as $path) {
             
             <!-- Submit Button -->
             <button type="submit" class="register-button">
-                <i class="fas fa-user-plus"></i> Create Account
+                <i class="fas fa-user-plus"></i> Create Account & Get Confirmation Email
             </button>
         </form>
         
@@ -630,105 +799,64 @@ foreach ($possible_paths as $path) {
         <div class="login-section">
             <p>Already have an account?</p>
             <a href="<?= base_url('src/modules/auth/login.php'); ?>" class="login-link">
-                Login here
+                <i class="fas fa-sign-in-alt"></i> Login here
             </a>
         </div>
     </div>
 </div>
 
 <script>
-    // Form validation
     document.getElementById('registerForm').addEventListener('submit', function(e) {
-        const requiredFields = this.querySelectorAll('[required]');
-        let isValid = true;
         const submitBtn = this.querySelector('.register-button');
         
-        // Check required fields
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                isValid = false;
-                field.style.borderColor = '#dc2626';
-                field.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
-                
-                setTimeout(() => {
-                    field.style.borderColor = '';
-                    field.style.boxShadow = '';
-                }, 2000);
-            }
-        });
+        // Validate email format
+        const email = document.getElementById('email').value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         
-        const emailField = this.querySelector('#email');
-        if (emailField.value.trim()) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(emailField.value)) {
-                isValid = false;
-                emailField.style.borderColor = '#dc2626';
-                emailField.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
-                
-                setTimeout(() => {
-                    emailField.style.borderColor = '';
-                    emailField.style.boxShadow = '';
-                }, 2000);
-            }
+        if (!emailRegex.test(email)) {
+            e.preventDefault();
+            alert('Please enter a valid email address');
+            return false;
         }
         
         // Validate password length
-        const passwordField = this.querySelector('#password');
-        if (passwordField.value.trim() && passwordField.value.length < 6) {
-            isValid = false;
-            passwordField.style.borderColor = '#dc2626';
-            passwordField.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
-            
-            setTimeout(() => {
-                passwordField.style.borderColor = '';
-                passwordField.style.boxShadow = '';
-            }, 2000);
-        }
-        
-        if (!isValid) {
+        const password = document.getElementById('password').value;
+        if (password.length < 6) {
             e.preventDefault();
+            alert('Password must be at least 6 characters');
             return false;
         }
         
         // Add loading state
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account & Sending Email...';
         submitBtn.style.opacity = '0.7';
         submitBtn.disabled = true;
         
         return true;
     });
     
-    // Input focus effects
-    const inputs = document.querySelectorAll('.form-control');
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            this.parentElement.style.transform = 'translateY(-1px)';
-        });
+    // Password strength indicator
+    document.getElementById('password').addEventListener('input', function() {
+        const strengthText = this.nextElementSibling;
+        const length = this.value.length;
         
-        input.addEventListener('blur', function() {
-            this.parentElement.style.transform = 'translateY(0)';
-        });
+        if (length === 0) {
+            strengthText.textContent = 'Minimum 6 characters';
+            strengthText.style.color = '';
+        } else if (length < 6) {
+            strengthText.textContent = 'Too short - need at least 6 characters';
+            strengthText.style.color = '#dc2626';
+        } else if (length < 8) {
+            strengthText.textContent = 'Fair';
+            strengthText.style.color = '#f59e0b';
+        } else if (length < 10) {
+            strengthText.textContent = 'Good';
+            strengthText.style.color = '#10b981';
+        } else {
+            strengthText.textContent = 'Strong ✓';
+            strengthText.style.color = '#059669';
+        }
     });
-    
-    // Real-time validation for password
-    const passwordInput = document.getElementById('password');
-    if (passwordInput) {
-        passwordInput.addEventListener('input', function() {
-            if (this.value.length < 6 && this.value.length > 0) {
-                this.style.borderColor = '#f59e0b';
-                this.nextElementSibling.style.color = '#f59e0b';
-                this.nextElementSibling.textContent = 'Password should be at least 6 characters';
-            } else if (this.value.length >= 6) {
-                this.style.borderColor = '#10b981';
-                this.nextElementSibling.style.color = '#10b981';
-                this.nextElementSibling.textContent = 'Password is strong ✓';
-            } else {
-                this.style.borderColor = '';
-                this.nextElementSibling.style.color = '';
-                this.nextElementSibling.textContent = 'Minimum 6 characters';
-            }
-        });
-    }
 </script>
 
 </body>
