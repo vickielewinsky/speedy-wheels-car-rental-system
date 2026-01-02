@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to Speedy Wheels</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #2c3e50; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9f9f9; padding: 30px; }
+        .footer { background: #ecf0f1; padding: 20px; text-align: center; font-size: 12px; }
+        .button { display: inline-block; background: #3498db; color: white; 
+                  padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to Speedy Wheels!</h1>
+        </div>
+        
+        <div class="content">
+            <h2>Hello {{username}},</h2>
+            
+            <p>Your account has been successfully created and you're now ready to start your journey with Speedy Wheels Car Rental.</p>
+            
+            <p><strong>Account Details:</strong></p>
+            <ul>
+                <li>Username: {{username}}</li>
+                <li>Email: {{email}}</li>
+            </ul>
+            
+            <p>You can now:</p>
+            <ul>
+                <li>Browse our fleet of vehicles</li>
+                <li>Make bookings online</li>
+                <li>Track your rentals</li>
+                <li>Manage your profile</li>
+            </ul>
+            
+            <p style="text-align: center;">
+                <a href="[YOUR_SITE_URL]/login.php" class="button">Login to Your Account</a>
+            </p>
+            
+            <p>If you have any questions, feel free to contact our support team.</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; <?php echo date('Y'); ?> Speedy Wheels Car Rental. All rights reserved.</p>
+            <p>This is an automated message, please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>
