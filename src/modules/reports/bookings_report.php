@@ -208,7 +208,6 @@ require_once "../../includes/header.php";
     </div>
 
     <!-- Booking Charts -->
-    <!-- ... -->
 </div>
 
 <?php require_once "../../includes/footer.php"; ?>
