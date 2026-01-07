@@ -1,6 +1,6 @@
 <?php
 // Speedy Wheels Car Rental System
-// src/modules/auth/register.php - FIXED VERSION
+// src/modules/auth/register.php 
 
 // Start session FIRST
 if (session_status() === PHP_SESSION_NONE) {
@@ -137,7 +137,7 @@ function sendRegistrationEmail($email, $name, $username) {
                 </ul>
                 
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="' . base_url('src/modules/auth/login.php') . '" class="btn">
+                    <a href="http://localhost/speedy-wheels-car-rental-system/src/modules/auth/login.php" class="btn">
                         🔑 Login to Your Account
                     </a>
                 </div>
@@ -173,7 +173,7 @@ function sendRegistrationEmail($email, $name, $username) {
         $plain_text .= "Email: " . $email . "\n";
         $plain_text .= "Account Created: " . date('F j, Y') . " at " . date('g:i A') . "\n\n";
         $plain_text .= "You can now login to your account and start booking vehicles.\n\n";
-        $plain_text .= "Login URL: " . base_url('src/modules/auth/login.php') . "\n\n";
+        $plain_text .= "Login URL: http://localhost/speedy-wheels-car-rental-system/src/modules/auth/login.php\n\n";
         $plain_text .= "Need help? Contact us:\n";
         $plain_text .= "Phone: 254712345678\n";
         $plain_text .= "Email: support@speedywheels.com\n\n";
@@ -798,7 +798,7 @@ foreach ($possible_paths as $path) {
         <!-- Login Link -->
         <div class="login-section">
             <p>Already have an account?</p>
-            <a href="<?= base_url('src/modules/auth/login.php'); ?>" class="login-link">
+            <a href="login.php" class="login-link">
                 <i class="fas fa-sign-in-alt"></i> Login here
             </a>
         </div>

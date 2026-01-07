@@ -2,9 +2,9 @@
 <?php require_once __DIR__ . "/../helpers/url_helper.php"; ?>
 <?php
 class MpesaConfig {
-    // YOUR ACTUAL CREDENTIALS FROM THE PORTAL
-    const CONSUMER_KEY = 'YUC3ELHtuKHH64mhftrNZj7WOGyCfWuADk3VwJmaA5lPtxZY'; // Use your FULL Consumer Key
-    const CONSUMER_SECRET = 'IG7AYLSmRlNAFyridhG1GZhfdDWKIVDwmsQbJKmADuEN52aJMyJqMX31AqABom4C'; // Use your FULL Consumer Secret
+    // MY ACTUAL CREDENTIALS FROM THE PORTAL
+    const CONSUMER_KEY = 'YUC3ELHtuKHH64mhftrNZj7WOGyCfWuADk3VwJmaA5lPtxZY'; 
+    const CONSUMER_SECRET = 'IG7AYLSmRlNAFyridhG1GZhfdDWKIVDwmsQbJKmADuEN52aJMyJqMX31AqABom4C'; 
     const BUSINESS_SHORTCODE = '174379'; // Sandbox shortcode
     const PASSKEY = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919';
     const TRANSACTION_TYPE = 'CustomerPayBillOnline';
